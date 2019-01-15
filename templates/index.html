@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="icon" href="/static/img/logo32.ico" sizes="32x32">
+        <link rel="stylesheet" href="/static/css/index.css" type="text/css">
+        <script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+        <script src="/static/js/functions.js"></script>
+        <script src="/static/js/volume.js"></script>
+        <script src="/static/js/main.js"></script>
+
+        <title>K-Music</title>
+</head>
+    <script>
+        $(function () {
+            $.ajaxSetup({
+                data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+            });
+        });
+
+
+    </script>
+<body>
+    <div class="loginbg" ></div>
+    <div class="login">
+        <div class="lognear">
+            <img src="/static/img/hyhd.png" alt="">
+        </div>
+        <div class="lformwrap">
+                <p>
+                    <input type="text" name="uname" id="uname" placeholder="请输入用户名">
+                </p>
+                <p>
+                    <input type="password" name="upwd" id="upwd" placeholder="请输入密码">
+                </p>
+                <p>
+                    <input type="checkbox" name="issave" id="issave" value="1">记住登陆状态
+                    <a href="javascript:void(0);" id="forgetpwd">忘记密码?</a>
+                 </p>
+                <span id='logcheckmsg'>&#12288;</span>
+                <p>
+                    <button id="logsubmit">登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</button>
+                </p>
+                <p>
+
+                    <button id="logquit">取&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;消</button>
+                </p>
+        </div>
+    </div>
+    {% csrf_token %}
+    <div class="register">
+        <div class="regnear">
+            <img src="/static/img/jrwm.png" alt="">
+        </div>
+        <div class="rformwrap">
+
+                <p>
+                    <input type="text" name="urname" id="urname" placeholder="用户名" required="required">
+                </p>
+                <p>
+                    <input type="password" name="urpwd" id="urpwd" placeholder="密码(6-18位字母、数字、下划线组成)" required>
+                </p>
+                <p>
+                    <input type="password" name="urpwd2" id="urpwd2" placeholder="确认密码" required="required">
+                </p>
+                <p>
+                    <input type="email" name="uemail" id="uemail" placeholder="个人邮箱(用于找回密码)">
+                </p>
+                <span id='regcheckmsg'>&#12288;</span>
+                <p>
+                    <button id="regsubmit">注&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;册</button>
+                </p>
+                <p>
+                    <button id="regquit">取&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;消</button>
+                </p>
+        </div>
+    </div>
+    <div class="templist">
+        <div class="listtitle">
+            <div class="temptitle">
+                播放列表
+                <a href="javascript:void(0);" class="tempclose">关闭</a>
+                <a href="javascript:void(0);" class="tempdel">清空</a>
+            </div>
+
+        </div>
+        <ul class="tempul">
+
+        </ul>
+    </div>
+    <div id="addlistmenu" style="visibility: hidden">
+        <div style="border-bottom: 3px solid #5d3131;margin-bottom: 5px;font-weight: 600;display: inline-block;width: 350px;">
+            选择要添加的歌单
+        </div>
+        <div class="addlistmenuclose">取消</div>
+        <ol class="addlistol">
+        </ol>
+    </div>
+
+    <div id="createlist" style="visibility: hidden">
+        <input type="text" placeholder="请输入要创建的歌单名称" required="required" id="createlistipt">
+        <p>
+            <span id="creatlistmsg">&#12288;</span>
+        </p>
+
+        <button id="createlistsubmit">提 交</button>
+        <button id="createlistquit">取 消</button>
+    </div>
+
+
+    <div class="container">
+        <div class="topnav">
+            <div class="top-wrapper">
+                <a href="/">
+                    <img class="logo" src="/static/img/logo.png" alt="">
+                </a>
+                <ol class="top-links">
+                    <li id="srcli">
+                        <input type="text" class="topsrchipt" placeholder="搜索">
+                        <button class="topsrchbtn"></button>
+                    </li>
+                    {% if request.session.user_name %}
+                    <a href="javascript:void(0);" id="mylist"><li>我的歌单</li></a>
+                    <a href="javascript:void(0);" id="logout"><li>退出</li></a>
+                    <li id="user">{{ request.session.user_name }}</li>
+                    {% else %}
+                    <a href="javascript:void(0);" id="login"><li>登录</li></a>
+                    <a href="javascript:void(0);" id="register"><li id="registerli">注册账号</li></a>
+                    {% endif %}
+                    
+                </ol>
+            </div>
+        </div>
+        <div class="main">
+            <div>
+                <ul class="bgbanner">
+                    <li><img src="/static/img/qx1920.png" alt="" class="tu1 bgpic"></li>
+                    <li><img src="/static/img/tyt1920.png" alt="" class="tu2 bgpic"></li>
+                </ul>
+            </div>
+            <div class="mainbody">
+                <p>
+                    <input type="text"
+                    placeholder="                            搜索歌曲/歌手/专辑"
+                    class="srchinput">
+                    <button class="srchbtn">Start</button>
+                </p>
+                
+            </div>
+            
+        </div>
+        <div class="playernav">
+            <div class="player-wrapper">
+                <div class="btns">
+                    <a href="javascript:void(0);" class="prev" title="上一首"></a>
+                    <a href="javascript:void(0);" class="play" title="播放/暂停"></a>
+                    <a href="javascript:void(0);" class="next" title="下一首"></a>
+                </div>
+                <div class="song">
+                    <div class="mcover">
+                        <a href="javascript:void(0);"><img src="/static/img/defaultcover.jpg" alt="" id="mscover"></a>
+                    </div>
+                    <div class="words">
+                        <span class="songname">Photograph</span>
+                        <span class="singer">Ed Sheeran</span>
+                        <span class="currtime">00:00/00:00</span>
+                    </div>
+                    <div class="timebar">
+                        <div class="barbg">
+                            <div class="cur">
+                                <span class="curbtn"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ctrl">
+                    <ul class="ctrlbtns">
+                        <li class="volume">
+                            <a href="javascript:void(0);" id="mutebtn" class="mute"></a>
+                            <div class="volbar">
+                                <div class="volcur">
+                                    <div class="volbtn"></div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="loop" title="列表循环"></li>
+                        <li class="playlist" title="播放列表"></li>
+                    </ul>
+                </div>
+                <audio src="http://music.163.com/song/media/outer/url?id=28692519.mp3"
+                id="playing" style="visibility:hidden" preload="auto"></audio>
+                <!-- <audio src="/static/audio/duan.mp3" id="playing" style="visibility:hidden" loop></audio> -->
+            </div>
+        </div>
+        
+    </div>
+    
+</body>
+</html>

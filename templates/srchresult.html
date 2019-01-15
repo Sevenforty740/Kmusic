@@ -1,0 +1,174 @@
+<style>
+body{
+    margin: 0;
+}
+.rstmain{
+    border-left:1px solid #5e3434;
+    border-right: 1px solid #5e3434;
+    margin: 0 auto;
+    width: 1440px;
+    background-color: #e1bfbf;
+}
+
+table{
+    width: 700px;
+    text-align: center;
+    float: left;
+    padding: 0;
+    margin: 10px;
+}
+td{
+    font-size: 14px;
+    height: 20px;
+}
+table, th{
+  border: 1px solid #5e3434;
+}
+
+.even{
+    background-color: #c3a5a5;
+}
+
+.title{
+    border-bottom: 3px solid #5d3131;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.songurl{
+    display: block;
+    width: 50px;
+    height: 20px;
+    visibility: hidden;
+}
+.plybtn{
+    cursor: pointer;
+    position: relative;
+
+    bottom: 11px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("/static/img/r_play-g.png");
+}
+.plybtn:hover{
+    background-image: url("/static/img/r_play-r.png");
+}
+.addlstbtn{
+    position: relative;
+    left: 2px;
+    bottom: 11px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    background-image: url("/static/img/addlist16-g.png");
+}
+.addlstbtn:hover{
+    background-image: url("/static/img/addlist16-r.png");
+}
+
+.rspbaction {
+    cursor: pointer;
+    position: relative;
+
+    bottom: 11px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("/static/img/r_play-r.png");
+}
+
+.srchsinger{
+    color: #5e3434;
+}
+</style>
+<script>
+    //搜索结果div高度
+    var resheight;
+    if($('#netease').height()>$('#qq').height()){
+        resheight = $('#netease').height();
+    }else{
+        resheight = $('#qq').height();
+    }
+    $('.rstmain').height(resheight+150);
+</script>
+
+
+{% csrf_token %}
+<div class="rstmain">
+    <div class="result">
+        <hr>
+        <h3 class="title">
+            以下为<span style="color: #bb714c;">"{{ target }}"</span>的搜索结果
+        </h3>
+        <table cellspacing='0' id="netease">
+            <thead>
+                <tr>
+                    <th colspan="5">网易云音乐</th>
+                </tr>
+                <tr>
+                    <th width="50px"></th>
+                    <th>歌曲</th>
+                    <th width="55px">时长</th>
+                    <th width="95px">歌手</th>
+                    <th width="200px">专辑</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in netEaseRes|slice:"1:" %}
+                    {% if forloop.counter|divisibleby:2 %}
+                        <tr class="even">
+                    {% else %}
+                        <tr>
+                    {% endif %}
+                        <td>
+                            <span class="songurl">http://music.163.com/song/media/outer/url?id={{ song.songid }}.mp3</span>
+                            <span class="plybtn"></span>
+                            <span class="addlstbtn"></span>
+                        </td>
+                        <td title="{{ song.songname }}">{{ song.songname|truncatechars:29 }}</td>
+                        <td>{{ song.tottime }}</td>
+                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.singername }}</a></td>
+                        <td title="{{ song.albumname }}">{{ song.albumname|truncatechars:25 }}</td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+        <table cellspacing='0' id="qq">
+            <thead>
+                <tr>
+                    <th colspan="5">QQ音乐</th>
+                </tr>
+                <tr>
+                    <th width="50px"></th>
+                    <th>歌曲</th>
+                    <th width="55px">时长</th>
+                    <th width="95px">歌手</th>
+                    <th width="200px">专辑</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in qqRes|slice:"1:" %}
+                    {% if forloop.counter|divisibleby:2 %}
+                        <tr class="even">
+                    {% else %}
+                        <tr>
+                    {% endif %}
+                        <td>
+{#                            <span class="songurl">http://111.202.98.146/amobile.music.tc.qq.com/{{ song.songid }}.m4a?guid=1848955700&vkey=C08C114212C13878FDA750F8750F259380008C6F0CD8B3ADFA3A08978B500E72C40EF5368645F20DFBB6C901EA0D0A4E815E2D00AC190C19&uin=0&fromtag=66</span>#}
+                            <span class="songurl">http://111.202.98.146/amobile.music.tc.qq.com/{{ song.songid }}.m4a?guid=1848955700&vkey=8F6B71A3D50142BEE21F1FE6C9B1F217B181DDDDDD845C98CF5CF309AE5C0969142E6CE72EA39A3A5A8DB1D43531AB309179D71F2BB8BC40&uin=0&fromtag=66</span>
+                            <span class="plybtn"></span>
+                            <span class="addlstbtn"></span>
+                        </td>
+                        <td title="{{ song.songname }}">{{ song.songname|truncatechars:30 }}</td>
+                        <td>{{ song.tottime }}</td>
+                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.singername }}</a></td>
+                        <td title="{{ song.albumname }}">{{ song.albumname|truncatechars:25 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

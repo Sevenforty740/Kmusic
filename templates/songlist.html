@@ -1,0 +1,299 @@
+<style>
+body{
+    margin: 0;
+}
+.rstmain{
+    border-left:1px solid #5e3434;
+    border-right: 1px solid #5e3434;
+    border-bottom: 1px solid #5e3434;
+    margin: 0 auto;
+    width: 1440px;
+    background-color: #e1bfbf;
+}
+
+table{
+    width: 1100px;
+    text-align: center;
+    float: right;
+    padding: 0;
+    margin: 10px;
+}
+td{
+    font-size: 14px;
+    height: 20px;
+}
+table, th{
+  border: 1px solid #5e3434;
+}
+
+.even{
+    {#background-color: #c3a5a5;#}
+    background-color: #c3a5a5;
+}
+
+.title{
+    border-bottom: 3px solid #5d3131;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.songurl{
+    display: block;
+    width: 50px;
+    height: 20px;
+    visibility: hidden;
+}
+.plybtn{
+    cursor: pointer;
+    position: relative;
+    left: 17px;
+    bottom: 11px;
+    display: block;
+    width: 16px;
+    height: 16px;
+    background-image: url("/static/img/r_play-g.png");
+}
+.plybtn:hover{
+    background-image: url("/static/img/r_play-r.png");
+}
+
+.rspbaction {
+    cursor: pointer;
+    position: relative;
+    left: 17px;
+    bottom: 11px;
+    display: block;
+    width: 16px;
+    height: 16px;
+    background-image: url("/static/img/r_play-r.png");
+}
+
+.srchsinger{
+    color: #5e3434;
+}
+
+.songlistsidebar{
+    box-sizing: border-box;
+    margin-left: 10px;
+    padding: 10px;
+    width: 300px;
+    height: 500px;
+    background-color: #e1bfbf;
+    border: 1px solid #5d3131;
+    float: left;
+    border-radius: 5px;
+    overflow-y: auto;
+}
+.sbtitle{
+    font-weight: 600;
+    border-bottom: 3px solid #5d3131;
+    margin-bottom: 10px;
+}
+.sbtitle a{
+    float: right;
+    color: #5d3131;
+    text-decoration: none;
+}
+
+
+.sbslname{
+    cursor: pointer;
+    display: inline-block;
+    width: 250px;
+}
+.sbslname:hover{
+    background-color: #c3a5a5;
+}
+.delslbtn{
+    cursor: pointer;
+    float: right;
+    position: relative;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    background-image: url("/static/img/del-g.png");
+}
+.delslbtn:hover{
+    background-image: url("/static/img/del-r.png");
+}
+.plylist{
+    font-size: 16px;
+    position: relative;
+    left: 20px;
+    cursor: pointer;
+    color: white;
+    background-color: #5d3131;
+    width: 150px;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+}
+.delsongbtn{
+    display: block;
+    position: relative;
+    left: 15px;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    background-image: url("/static/img/del-g.png");
+}
+.delsongbtn:hover{
+    background-image: url("/static/img/del-r.png");
+}
+</style>
+<script>
+    $(function () {
+        $('.songlistsidebar').on('click','.sbslname',function () {
+            $.ajax({
+                type:'GET',
+                url:'/chgsonglist/',
+                data:{
+                    listname:$(this).html(),
+                },
+                success:function (data) {
+                    $('.main').html(data)
+                }
+            })
+        });
+
+        $('.delsongbtn').click(function () {
+            var thistr = $(this).parent().parent();
+            $.ajax({
+                type:'GET',
+                url:'/listrmsong/',
+                data:{
+                    listname : $('.listname').html(),
+                    songname : $(this).parent().prev().prev().prev().html(),
+                    duration : $(this).parent().prev().prev().html(),
+                },
+                success:function () {
+                    thistr.remove();
+                }
+            })
+        });
+
+        $('.delslbtn').click(function () {
+            $.ajax({
+                type:'GET',
+                url:'/rmlist/',
+                data:{
+                    listname : $(this).prev().html()
+                },
+                success : function (data) {
+                    $('.main').html(data)
+                }
+            })
+        });
+
+        $('.plylist').click(function () {
+            var tmpul = $('.tempul');
+            tmpul.empty();
+            var trs = $('.sltbody')[0].children;
+            for(var i=0;i<trs.length;i++){
+                var url = trs[i].children[0].children[0].innerHTML;
+                var songname = trs[i].children[1].innerHTML;
+                var singer = trs[i].children[3].children[0].innerHTML;
+                var duration = trs[i].children[2].innerHTML;
+                var $li = $('<li class="templi"  playing="1"><div class="temp3"><div class="tempsongname">'+songname+'</div><div class="tempsongurl">'+url+'</div><div class=\"tempsinger\">'+singer+'</div><div class=\"tempduration\">'+duration+'</div></div><div class="tempsongdel"></div></li>');
+                tmpul.append($li)
+            }
+            var src1 = tmpul[0].children[0].children[0].children[1].innerHTML;
+            var songname1 = tmpul[0].children[0].children[0].children[0].innerHTML;
+            var singer1 = tmpul[0].children[0].children[0].children[2].innerHTML;
+
+            $('#playing').attr({'src':src1});
+            $('#playing')[0].play();
+            $('.songname').html(songname1);
+            $('.singer').html(singer1);
+            timer = setInterval(ProgressTime,1000);
+            $('.plybtn').removeClass('rspbaction');
+        });
+
+        $('#createlista').click(function () {
+            $('#createlist').css('visibility','visible')
+        });
+
+
+        $('#createlistquit').click(function () {
+            $('#createlist').css('visibility','hidden')
+        });
+
+
+
+        //搜索结果div高度
+        var resheight;
+        if($('#netease').height()>$('#qq').height()){
+            resheight = $('#netease').height();
+        }else{
+            resheight = $('#qq').height();
+        }
+        $('.rstmain').height(resheight+150);
+
+
+
+
+
+
+
+    })
+</script>
+
+<div class="rstmain">
+    <div class="result">
+        <hr>
+        <div class="songlistsidebar">
+            <div class="sbtitle">
+                我的歌单
+                <a href="javascript:void(0);" id="createlista">新建歌单</a>
+            </div>
+
+            {% for sl in songlists %}
+            <div class="eachsonglist">
+                <p>
+                    <div class="sbslname">{{ sl.listname }}</div>
+                    <div class="delslbtn"></div>
+                </p>
+            </div>
+            {% endfor %}
+
+
+
+        </div>
+        <button class="plylist">播放歌单</button>
+        <table cellspacing='0' id="netease">
+            <thead>
+                <tr>
+                    <th colspan="5" class="listname">{{ list.listname }}</th>
+                </tr>
+                <tr>
+                    <th width="50px"></th>
+                    <th>歌   曲</th>
+                    <th width="150px">时   长</th>
+                    <th width="150px">歌   手</th>
+                    <th width="50px"></th>
+                </tr>
+            </thead>
+            <tbody class="sltbody">
+                {% for song in songs %}
+                    {% if forloop.counter|divisibleby:2 %}
+                        <tr class="even">
+                    {% else %}
+                        <tr>
+                    {% endif %}
+                        <td>
+                            <span class="songurl">{{ song.url }}</span>
+                            <span class="plybtn"></span>
+                        </td>
+                        <td title="{{ song.name }}">{{ song.name|truncatechars:40 }}</td>
+                        <td>{{ song.duration }}</td>
+                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.singer }}</a></td>
+                        <td>
+                            <span class="delsongbtn"></span>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+</div>

@@ -1,0 +1,698 @@
+
+body,h1,h2,h3,h4,ol,ul{
+    margin: 0;
+    padding: 0;
+    font-size: 100%
+}
+html,body{
+    width: 100%;
+    height: 100%;
+}
+
+body{
+
+    background: #caa9a9;
+    font-size: 16px;
+    font-family: 'Microsoft YaHei';
+
+}
+
+a{
+    text-decoration: none;
+    color: #dfdfdf
+}
+input::-webkit-input-placeholder{
+    color:#caa9a9;
+}
+input::-moz-placeholder{   /* Mozilla Firefox 19+ */
+    color:#caa9a9;
+}
+input:-moz-placeholder{    /* Mozilla Firefox 4 to 18 */
+    color:#caa9a9;
+}
+input:-ms-input-placeholder{  /* Internet Explorer 10-11 */ 
+    color:#caa9a9;
+}
+.container{
+    height: 100%;
+    /*此处修改*/
+    max-width: available;
+    margin: 0 auto;
+}
+
+.topnav{
+    width: 100%;
+    height: 70px;
+    background-color: #5d3131;
+}
+
+.top-wrapper{
+    max-width: 1440px;
+    min-width: 1000px;
+    height: 70px;
+    margin: 0 auto;
+    background-color: #5d3131;
+    line-height: 70px;
+}
+.logo{
+    height: 70px;
+}
+
+.top-links{
+    float: right;
+    list-style-type: none;
+}
+
+.top-links li{
+    letter-spacing:3px;
+    font-size: 16px;
+    float: left;
+    /* font-weight: 600; */
+    padding: 0 20px;
+
+}
+.top-links li:hover{
+    background-color: #4b2e2b;
+}
+#srcli:hover{
+    background-color:#5d3131;
+}
+
+.topsrchipt{
+    width: 70px;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    border-bottom: 2px solid white;
+    color: white;
+    padding: 0 0 5px 5px;
+    font-size: 15px;
+    transition: 0.5s;
+}
+
+.topsrchipt:focus{
+    width: 150px;
+}
+
+.topsrchbtn{
+    position: relative;
+    top: 15px;
+    background:none;
+    border: none;
+    height: 32px;
+    width: 32px;
+    background-image: url(/static/img/search.png);
+    background-repeat: no-repeat;
+    background-size: 80%;
+    cursor: pointer;
+}
+
+
+
+
+
+
+#user{
+    color: white;
+    background: #9c594e;
+}
+
+
+#registerli{
+    background: #9c594e;
+    /* color: #84d8aa */
+}
+
+#registerli:hover{
+    background: #4b2e2b;
+}
+
+.playernav{
+    position: fixed;
+    bottom: 0px;
+    background: #5d3131;
+    height: 70px;
+    width: 100%;
+}
+
+.player-wrapper{
+    max-width: 1440px;
+    min-width: 1000px;
+    margin: 0 auto;
+    height: 70px;
+}
+.btns{
+    float: left;
+    margin-left: 20px;
+    display: inline-block;
+    width: 200px;
+    height: 70px;
+}
+.btns a{
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    margin: 10px;
+}
+.btns .prev{
+    width: 40px;
+    height: 40px;
+    background-image: url(/static/img/prev-g.png);
+    background-size: 90%;
+}
+.btns .prev:hover{
+    background-image: url(/static/img/prev-r.png);
+}
+
+.btns .play{
+    background-image: url(/static/img/play-g.png);
+}
+.btns .play:hover{
+    background-image: url(/static/img/play-r.png);
+}
+.btns .pause{
+    background-image: url(/static/img/pause-g.png)
+}
+.btns .pause:hover{
+    background-image: url(/static/img/pause-r.png)
+}
+.btns .next{
+    width: 40px;
+    height: 40px;
+    background-image: url(/static/img/next-g.png);
+    background-size: 90%;
+}
+.btns .next:hover{
+    background-image: url(/static/img/next-r.png);
+}
+.song{
+    float: left;
+    position: relative;
+    left: 150px;
+    height: 70px;
+    width: 600px;
+}
+.mcover{
+    float: left;
+    position: relative;
+    top:5px;
+}
+#mscover{
+    display: inline-block;
+    width:  60px;
+    height: 60px;
+}
+.words{
+    color: #dfdfdf;
+    width: 493px;
+    height: 30px;
+    float: left;
+    position: relative;
+    top: 10px;
+    left: 20px;
+    line-height: 30px;
+}
+.words span{
+    margin-right: 20px;
+
+}
+
+.singer{
+    color: #b8a6a6;
+}
+.words .currtime{
+    float: right;
+    margin-right: 5px;
+}
+.timebar{
+    position: relative;
+    top: 50px;
+    left: 80px;
+}
+.barbg{
+    display: block;
+    width: 493px;
+    height: 9px;
+    background: url(/static/img/timebar.png) no-repeat 0 9999px;
+    background-position: right 0;
+}
+.cur{
+    width: 0;
+    height: 9px;
+    background: url(/static/img/timebar.png) no-repeat 0 9999px;
+    background-position: left -66px;
+}
+.curbtn{
+    cursor: pointer;
+    position: absolute;
+    bottom: -7.5px;
+    left: -8px;
+    display: block;
+    width: 22px;
+    height: 24px;
+    background: url(/static/img/playbarbtn.png) no-repeat;
+    background-position: 0 -250px;
+}
+
+.ctrl{
+    float: right;
+    /* 下面两行替换右浮动 可解决缩小窗口列表插入其他布局的问题 但是ctrl大小失控 有时间再调 */
+    /* position: relative;
+    left: 340px; */
+    height: 70px;
+}
+.ctrl ul{
+    list-style-type: none;
+}
+
+.ctrl ul li{
+    margin:20px 20px;
+    float: left;
+    height: 32px;
+    width: 32px;
+    background-size: 70%;
+    background-repeat: no-repeat;
+    background-position: 5px 5px;
+}
+.ctrl ul li:hover{
+    cursor: pointer;
+}
+
+.ctrl ul .volume{
+    margin-right: 0;
+    width: auto;
+    height: auto;
+    width: 200px;
+}
+.mute{
+    display: block;
+    width: 28px;
+    height: 28px;
+    background-image: url(/static/img/sound-g.png);
+    background-size: 28px;
+    float: left;    
+    position: relative;
+    top: 2px;
+}
+.mute:hover{
+    background-image: url(/static/img/sound-r.png);
+}
+
+.muteactive{
+    display: block;
+    width: 28px;
+    height: 28px;
+    background-image: url(/static/img/mute-g.png);
+    background-size: 28px;
+    float: left;    
+    position: relative;
+    top: 2px;
+}
+
+.muteactive:hover{
+    background-image: url(/static/img/mute-r.png);
+}
+
+.loop{
+    background-image: url(/static/img/loop-g.png)
+}
+
+.addlist{
+    background-image: url(/static/img/addlist-g.png)
+}
+.addlist:hover{
+    background-image: url(/static/img/addlist-r.png)
+}
+
+.playlist{
+    background-image: url(/static/img/playlist-g.png)
+}
+.playlist:hover{
+    background-image: url(/static/img/playlist-r.png)
+}
+.volbar{
+    position: relative;
+    top: 15px;
+    left: 40px;
+    width: 100px;
+    height: 3px;
+    background-color: #181818;
+}
+.volcur{
+    width: 50%;
+    height: 3px;
+    background-color: #C20C0C;
+}
+.volbtn{
+    margin-left: 50px;
+    position: absolute;
+    left: -8px;
+    bottom: -9px;
+    background-image: url(/static/img/playbarbtn.png);
+    background-position: -40px -250px;
+    background-color:transparent;
+    width: 18px;
+    height: 20px;
+}
+
+.loginbg{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #f3c5c53d;
+    z-index: 1;
+    display: none;
+}
+
+.blur{
+    -webkit-filter: blur(5px);
+    -moz-filter: blur(5px);
+    -o-filter: blur(5px);
+    -ms-filter: blur(5px);
+    filter: blur(5px);
+    transition: filter 0.5s;
+}
+
+.login,.register{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    display: none;
+}
+
+.lognear,.regnear{
+    width: 800px;
+    height: 300px;
+    margin-left:-400px;
+    margin-top: -150px;
+    background-color: #5d3131;
+    border-radius: 10px;
+    box-shadow: rgba(39, 39, 39, 0.377) 5px 5px 15px 5px;
+    font-family: 'Courier New', Courier, monospace
+}
+
+.lognear img{
+    width: 350px;
+    margin-top: 67px;
+}
+.regnear img{
+    width: 350px;
+    margin-top: 67px;
+}
+
+.lformwrap,.rformwrap{
+    box-sizing: border-box;
+    width: 400px;
+    height: 500px;
+    margin-left:-50px;
+    margin-top: -450px;
+    background: #eed4d4;
+    border-radius: 10px;
+    box-shadow: rgba(39, 39, 39, 0.377) 5px 5px 15px 5px ;
+    padding:50px;
+    color: #5d3131;
+}
+/* .register>.rformwrap{
+    padding: 20px 50px;
+} */
+
+#uname,#upwd,#urpwd,#urpwd2,#urname,#uemail{
+    box-sizing: border-box;
+    width: 300px;
+    height: 40px;
+    margin: 10px 0;
+    outline: none;
+    border:1px solid #a1a1a1;
+    border-radius: 7px;
+    padding-left: 10px;
+    font-size: 16px;
+}
+.register #urpwd,#urpwd2,#urname,#uemail{
+    margin: 0;
+}
+#isSave{
+    height: 15px;
+    width: 15px;
+    vertical-align: middle;
+}
+
+#forgetpwd{
+    float: right;
+    text-decoration: none;
+    color: #5d3131;
+}
+
+#logsubmit{
+    margin-top: 52px;
+}
+#regsubmit{
+    margin-top: 20px;
+}
+#logsubmit,#logquit,#regsubmit,#regquit{
+    width: 250px;
+    height: 40px;
+    border: 2px solid #5d3131;
+    border-radius: 7px;
+    margin-left: 25px;
+    font-size: 16px;
+    color: #dfdfdf;
+    background-color: #5d3131;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.main{
+    /* height: 868px; */
+    max-width: inherit;
+}
+
+.bgbanner img{
+    /*max-width: 100%;*/
+    width: 1920px;
+    pointer-events:none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    /* display:none; */
+}
+
+.bgbanner li{
+    position: absolute;
+    z-index: -10;
+}
+
+.mainbody{
+    position: relative;
+    margin: 0 auto;
+    width:1440px;
+    overflow: hidden;
+    /* border-left: 1px solid #5d3131;
+    border-right: 1px solid #5d3131; */
+}
+.mainbody p{
+    width: 650px;
+    margin: 350px 400px auto auto;
+}
+
+.mainbody .srchinput{
+    padding-left: 20px;
+    background-color: transparent;
+    width: 500px;
+    height: 40px;
+    border: 3px solid white;
+    border-radius: 30px;
+    color: white;
+    font-size: 20px;
+    outline: none;
+}
+
+.mainbody .srchbtn{
+    margin-left: 20px;
+    height: 48px;
+    width: 80px;
+    border: 3px solid white;
+    border-radius: 30px;
+    color: white;
+    background-color: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.templist{
+    border:1px solid #5d3131;
+    color: white;
+    position: fixed;
+    bottom:75px;
+    right: 5px;
+    width: 500px;
+    height: 350px;
+    background-color: #e1bfbf;
+    border-radius: 10px;
+    display:none;
+    /*overflow-scrolling: auto;*/
+    z-index: 5;
+}
+
+.listtitle{
+    width: inherit;
+    height: 40px;
+    background-color: #5d3131;
+    border-radius: 10px 10px 0 0;
+}
+
+.templist ul{
+    color : #5d3131;
+    height: 280px;
+    overflow: auto;
+    list-style-type: none;
+    padding: 5px 15px 15px 15px;
+
+
+}
+.templist ul>li{
+    margin-bottom: 10px;
+}
+
+
+.tempsongname{
+    width: 210px;
+    font-weight: 600;
+    overflow: hidden;
+}
+.tempsinger{
+    width: 120px;
+    overflow: hidden;
+}
+.tempduration{
+    margin-left: 10px;
+    overflow: hidden;
+}
+
+.templist .tempsongurl{
+    float: left;
+    display: none;
+}
+.templist ul>li div{
+    display: inline-block;
+}
+
+
+
+.templist .temptitle{
+    padding-left: 15px;
+    padding-right: 20px;
+    height: 40px;
+    line-height: 40px;
+}
+
+.tempdel{
+    float: right;
+    margin-right: 10px;
+}
+.tempclose{
+    float: right;
+
+}
+.tempsongdel{
+    position: relative;
+    left: 50px;
+    bottom: 3px;
+    height: 16px;
+    width: 16px;
+    background-image: url("/static/img/del-g.png");
+}
+.tempsongdel:hover{
+    cursor: pointer;
+    background-image: url("/static/img/del-r.png");
+}
+
+.templi{
+    display: block;
+    width: 400px;
+}
+.temp3:hover{
+    cursor: pointer;
+    background-color: #c3a5a5;
+}
+#addlistmenu{
+    padding: 15px;
+    margin: auto;
+    position: fixed;
+    left: 38%;
+    top: 30%;
+    width: 400px;
+    height: 300px;
+    border: 2px solid #5d3131;
+    background-color: #e1bfbf;
+    border-radius: 5px;
+    z-index: 10;
+    overflow-y: auto;
+}
+.addlistol{
+    list-style-type: none;
+}
+.addlistli{
+    width: 350px;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+.addlistli:hover{
+    background-color: #c3a5a5;
+}
+
+.addlistmenuclose{
+    cursor: pointer;
+    float: right;
+}
+
+#createlist{
+    position: fixed;
+    left: 38%;
+    top: 35%;
+    background-color: #e1bfbf;
+    width: 400px;
+    height: 250px;
+    border: 2px solid #5d3131;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+#createlist input{
+    outline: none;
+    padding-left: 10px;
+    font-size: 16px;
+    margin-top: 50px;
+    margin-left: 48px;
+    width: 290px;
+    height: 30px;
+    border: 1px solid #5d3131;
+    border-radius: 5px;
+}
+
+#createlistsubmit,#createlistquit{
+    margin-top: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    color: white;
+    background-color: #5d3131;
+    width: 130px;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+}
+#createlistsubmit{
+    margin-left: 63px;
+    margin-right: 10px;
+}
+
+#creatlistmsg{
+    margin-left: 63px;
+}
+#createlist p{
+    padding-left: 73px;
+}
