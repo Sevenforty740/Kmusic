@@ -318,6 +318,12 @@ $(function(){
         $('.singer').html(tsinger);
         $('.plybtn').removeClass('rspbaction');
         timer = setInterval(ProgressTime,1000);
+		$('#playing')[0].addEventListener('error',function () {
+            this.load();
+        });
+        $('#playing')[0].addEventListener('canplay',function () {
+            this.play();
+        });
 
     });
 

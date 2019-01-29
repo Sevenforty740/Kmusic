@@ -73,9 +73,7 @@ def addSong_views(request):
         if request.session.get('user_id'):
             user_id = request.session['user_id']
             songlists = Songlist.objects.filter(user_id=user_id).all()
-            songlists_l = []
-            for songlist in songlists:
-                songlists_l.append(songlist.listname)
+            songlists_l = [songlist.listname for songlist in songlists]
             songlists_l = json.dumps(songlists_l)
             return HttpResponse(songlists_l)
         else:
