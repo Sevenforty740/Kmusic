@@ -1,12 +1,13 @@
 from .netEaseEncode import *
 import requests
 import urllib.parse
+import time
 
 class MusicSearcher():
     def __init__(self,target,q):
         self.headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Connection': 'keep-alive',
+            'Connection': 'Keep-Alive',
             'Pragma': 'no-cache',
             'Cache-Control': 'no-cache',
             'Accept-Encoding': 'gzip,deflate,sdch',
@@ -16,27 +17,41 @@ class MusicSearcher():
         self.target = target
         self.q = q
         self.s = requests.session()
-
+		
 
     def qqSearch(self):
+        self.headers['Accept-Encoding'] = 'gzip, deflate'
+        self.headers['Accept-Language'] = 'zh-CN'
+        self.headers['Accept'] = '*/*'
+        self.headers['User-Agent'] = 'Mozilla/5.0(compatible;MSIE 9.0;Windows NT 6.1;WOW64;Trident/5.0)'
         self.headers['Host'] = 'c.y.qq.com'
-        self.headers['Referer'] = 'https://y.qq.com/portal/playlist.html'
+        self.headers['Referer'] = 'c.y.qq.com'
+		
+        cookie = {
+			'qqmusic_gkey' : '92B45FD2E353E84FF288DF16ACE5D5B198CBD33DE8DF7BDF',
+			'qqmusic_gtime' : '0',
+			'qqmusic_guid' : 'B1E901DA7379A44022C5AF79FDD9CD96',
+			'qqmusic_miniversion' : '53',
+			'qqmusic_version' : '16',
+			'qm_hideuin' : '0',
+			'qm_method' : '1'
+		}
+		
+        nowtime = int(time.time())
 
-        url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp?ct=24&qqmusic_ver=1298&' + \
-              'new_json=1&remoteplace=txt.yqq.center&searchid=43541888870417375&t=0&aggr=1' + \
-              '&cr=1&catZhida=1&lossless=0&flag_qc=0&p=1&n=100&' + \
-              'w={0}'.format(urllib.parse.quote(self.target)) + \
-              '&g_tk=5381&jsonpCallback=searchCallbacksong6064&loginUin=0&hostUin=0&' + \
-              'format=jsonp&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0'
+        url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp?format=json&t=0&loginUin=0&inCharset=GB2312&'+\
+			  'outCharset=utf-8&qqmusic_ver=1653&catZhida=1&p=1&n=100&'+\
+			  'w={}&flag_qc=0&remoteplace=txt.newclient.top&'.format(urllib.parse.quote(self.target)) +\
+			  'new_json=1&auto=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0&pcachetime={}'.format(nowtime)
 
-        response = self.s.get(url,headers=self.headers)
-        response = response.text[23:-1]
-        r_d = json.loads(response)
+        response = self.s.get(url,headers=self.headers,cookies=cookie)
+        r_d = json.loads(response.text)
+        r_l = r_d['data']['song']['list']
         resultList = ['qq']
-        for song in r_d['data']['song']['list']:
+        for song in r_l:
             songDic = {}
             songDic['songname'] = song['name']
-            songDic['songid'] = song['id']
+            songDic['songid'] = song['mid']
             songDic['tottime'] = getQQTime(song['interval'])
             songDic['singerid'] = song['singer'][0]['id']
             songDic['singername'] = song['singer'][0]['name']

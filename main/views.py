@@ -6,6 +6,8 @@ from queue import Queue
 from threading import Thread
 from .apis.musicsearcher import MusicSearcher
 from .models import *
+import requests
+
 
 q = Queue()  # 用于接收Thread线程的返回值
 
@@ -73,7 +75,9 @@ def addSong_views(request):
         if request.session.get('user_id'):
             user_id = request.session['user_id']
             songlists = Songlist.objects.filter(user_id=user_id).all()
-            songlists_l = [songlist.listname for songlist in songlists]
+            songlists_l = []
+            for songlist in songlists:
+                songlists_l.append(songlist.listname)
             songlists_l = json.dumps(songlists_l)
             return HttpResponse(songlists_l)
         else:
@@ -134,8 +138,33 @@ def createList_views(request):
 
 
 
-
-
+def qPlaySong_views(request):
+    if request.method == 'POST':
+        mid = request.POST.get('mid')
+        vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
+        data = {
+            'g_tk': '195219765',
+            'jsonpCallback': 'MusicJsonCallback004680169373158849',
+            'loginUin': '125045209',
+            'hostUin': '0',
+            'format': 'json',
+            'inCharset': 'utf8',
+            'outCharset': 'utf-8',
+            'notice': '0',
+            'platform': 'yqq',
+            'needNewCode': '0',
+            'cid': '205361747',
+            'callback': 'MusicJsonCallback004680169373158849',
+            'uin': '125045209',
+            'songmid': mid,
+            'filename': 'C400{}.m4a'.format(mid),
+            'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
+        }
+        res = requests.get(vkey_url, data, verify=False)
+        res = json.loads(res.text[36:-1])
+        vkey = res['data']['items'][0]['vkey']
+        url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(mid,vkey)
+        return HttpResponse(url)
 
 
 

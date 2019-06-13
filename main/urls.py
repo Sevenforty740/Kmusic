@@ -7,6 +7,7 @@ urlpatterns = [
     re_path(r'^search/$',search_views),
     re_path(r'^songlist/$', songList_views),
     re_path(r'^addsong/$',addSong_views),
+    re_path(r'^qplysong/$',qPlaySong_views),
     re_path(r'^chgsonglist/$', chgSongList_views),
     re_path(r'^listrmsong/$',listRmSong_views),
     re_path(r'^rmlist/$', removeList_views),

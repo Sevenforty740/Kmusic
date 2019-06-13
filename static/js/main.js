@@ -39,7 +39,7 @@ $(function(){
                         $('#playing')[0].play();
                         $('.songname').html(tsongname);
                         $('.singer').html(tsinger);
-                        $('.plybtn').removeClass('rspbaction');
+                        $('.plybtn, .qplybtn').removeClass('rspbaction');
                         timer = setInterval(ProgressTime,1000);
                         break;
                     }else{
@@ -50,7 +50,7 @@ $(function(){
                         $('#playing')[0].play();
                         $('.songname').html(tsongname);
                         $('.singer').html(tsinger);
-                        $('.plybtn').removeClass('rspbaction');
+                        $('.plybtn, .qplybtn').removeClass('rspbaction');
                         timer = setInterval(ProgressTime,1000);
                     }
 
@@ -68,7 +68,7 @@ $(function(){
                 $('#playing')[0].play();
                 $('.songname').html(tsongname);
                 $('.singer').html(tsinger);
-                $('.plybtn').removeClass('rspbaction');
+                $('.plybtn, .qplybtn').removeClass('rspbaction');
                 timer = setInterval(ProgressTime,1000);
             }
             else{
@@ -86,7 +86,7 @@ $(function(){
             $('#playing')[0].play();
             $('.songname').html(tsongname);
             $('.singer').html(tsinger);
-            $('.plybtn').removeClass('rspbaction');
+            $('.plybtn, .qplybtn').removeClass('rspbaction');
             timer = setInterval(ProgressTime,1000);
         }
     });
@@ -316,14 +316,8 @@ $(function(){
         $('#playing')[0].play();
         $('.songname').html(tsongname);
         $('.singer').html(tsinger);
-        $('.plybtn').removeClass('rspbaction');
+        $('.plybtn, .qplybtn').removeClass('rspbaction');
         timer = setInterval(ProgressTime,1000);
-		$('#playing')[0].addEventListener('error',function () {
-            this.load();
-        });
-        $('#playing')[0].addEventListener('canplay',function () {
-            this.play();
-        });
 
     });
 
@@ -387,7 +381,7 @@ $(function(){
                             $('#playing')[0].play();
                             $('.songname').html(tsongname);
                             $('.singer').html(tsinger);
-                            $('.plybtn').removeClass('rspbaction');
+                            $('.plybtn, .qplybtn').removeClass('rspbaction');
                             timer = setInterval(ProgressTime,1000);
                             break;
                         }else{
@@ -398,7 +392,7 @@ $(function(){
                             $('#playing')[0].play();
                             $('.songname').html(tsongname);
                             $('.singer').html(tsinger);
-                            $('.plybtn').removeClass('rspbaction');
+                            $('.plybtn, .qplybtn').removeClass('rspbaction');
                             timer = setInterval(ProgressTime,1000);
                         }
 
@@ -418,7 +412,7 @@ $(function(){
                 $('#playing')[0].play();
                 $('.songname').html(tsongname);
                 $('.singer').html(tsinger);
-                $('.plybtn').removeClass('rspbaction');
+                $('.plybtn, .qplybtn').removeClass('rspbaction');
                 timer = setInterval(ProgressTime,1000);
             }
             else{
@@ -436,7 +430,7 @@ $(function(){
             $('#playing')[0].play();
             $('.songname').html(tsongname);
             $('.singer').html(tsinger);
-            $('.plybtn').removeClass('rspbaction');
+            $('.plybtn, .qplybtn').removeClass('rspbaction');
             timer = setInterval(ProgressTime,1000);
         }
 
@@ -457,7 +451,7 @@ $(function(){
                             $('#playing')[0].play();
                             $('.songname').html(tsongname);
                             $('.singer').html(tsinger);
-                            $('.plybtn').removeClass('rspbaction');
+                            $('.plybtn, .qplybtn').removeClass('rspbaction');
                             timer = setInterval(ProgressTime,1000);
                             break;
                         }else{
@@ -468,7 +462,7 @@ $(function(){
                             $('#playing')[0].play();
                             $('.songname').html(tsongname);
                             $('.singer').html(tsinger);
-                            $('.plybtn').removeClass('rspbaction');
+                            $('.plybtn, .qplybtn').removeClass('rspbaction');
                             timer = setInterval(ProgressTime,1000);
                             break;
                         }
@@ -489,7 +483,7 @@ $(function(){
                 $('#playing')[0].play();
                 $('.songname').html(tsongname);
                 $('.singer').html(tsinger);
-                $('.plybtn').removeClass('rspbaction');
+                $('.plybtn, .qplybtn').removeClass('rspbaction');
                 timer = setInterval(ProgressTime,1000);
             }
             else{
@@ -507,7 +501,7 @@ $(function(){
             $('#playing')[0].play();
             $('.songname').html(tsongname);
             $('.singer').html(tsinger);
-            $('.plybtn').removeClass('rspbaction');
+            $('.plybtn, .qplybtn').removeClass('rspbaction');
             timer = setInterval(ProgressTime,1000);
         }
 
@@ -716,22 +710,18 @@ $(function(){
         $('.songname').html(songname);
         $('.singer').html(singer);
         timer = setInterval(ProgressTime,1000);
-        $('.plybtn').removeClass('rspbaction');
+        $('.plybtn, .qplybtn').removeClass('rspbaction');
         thisbtn.addClass('rspbaction');
 
-
-        $('#playing')[0].addEventListener('error',function () {
-            this.load();
-        });
-        $('#playing')[0].addEventListener('canplay',function () {
-            this.play();
-        });
         $('#playing')[0].addEventListener('ended',function () {
             thisbtn.removeClass('rspbaction');
         });
 
 
     }
+
+
+
     // 播放列表判断重复与否
     function notexists(lis,li) {
         for(var ii=0;ii<lis.length;ii++){
@@ -824,15 +814,93 @@ $(function(){
                 })
             }
         }
+    };
+
+
+
+
+    $('.main').on('click','.qplybtn',qlittlebtn);
+
+    function qlittlebtn() {
+        var thisbtn = $(this);
+        if(thisbtn.prev().html().length<30){
+            $.ajax({
+                async:false,
+                type:'POST',
+                url:'/qplysong/',
+                data:{
+                  mid: thisbtn.prev().html()
+                },
+                success:function (data) {
+                    thisbtn.prev().html(data);
+                }
+            });
+        }
+
+        var src = thisbtn.prev().html();
+        var songname = thisbtn.parent().next().html();
+        var singer = thisbtn.parent().next().next().next().children().html();
+        var duration = thisbtn.parent().next().next().html();
+        var $li = $('<li class="templi"  playing="1"><div class="temp3"><div class="tempsongname">'+songname+'</div><div class="tempsongurl">'+src+'</div><div class=\"tempsinger\">'+singer+'</div><div class=\"tempduration\">'+duration+'</div></div><div class="tempsongdel"></div></li>');
+        var lis = $('.tempul')[0].children;
+        if(lis.length>0){
+            if(notexists(lis,$li)){
+                $('.tempul').append($li);
+            }
+        }else {
+            $('.tempul').append($li);
+        }
+
+        $('#playing').attr({'src':src});
+        $('#playing')[0].play();
+        $('.songname').html(songname);
+        $('.singer').html(singer);
+        timer = setInterval(ProgressTime,1000);
+        $('.plybtn, .qplybtn').removeClass('rspbaction');
+        thisbtn.addClass('rspbaction');
+
+
+        $('#playing')[0].addEventListener('ended',function () {
+            thisbtn.removeClass('rspbaction');
+        });
+
+
     }
 
-
-
-
-
-
-
-
+    $('.main').on('click','.qaddlstbtn',function () {
+        thisaddbtn = $(this);
+        if(thisaddbtn.prev().prev().html().length<30){
+            $.ajax({
+                async:false,
+                type:'POST',
+                url:'/qplysong/',
+                data:{
+                  mid: thisaddbtn.prev().prev().html()
+                },
+                success:function (data) {
+                    thisaddbtn.prev().prev().html(data);
+                }
+            });
+        }
+        $.ajax({
+            type : 'GET',
+            url : '/addsong/',
+            success:function (data) {
+                if(data=='请您先登录账号 才可使用歌单功能'){
+                    alert(data)
+                }
+                else{
+                    $('.addlistol').empty();
+                    data = JSON.parse(data);
+                    for(var i=0;i<data.length;i++){
+                        var $li = $('<li class="addlistli">'+ data[i] +'</li>');
+                        $('.addlistol').append($li)
+                    }
+                    $('#addlistmenu').css('visibility','visible')
+                }
+            }
+         })
+    });
 
 
 

@@ -53,6 +53,19 @@ table, th{
 .plybtn:hover{
     background-image: url("/static/img/r_play-r.png");
 }
+.qplybtn{
+    cursor: pointer;
+    position: relative;
+
+    bottom: 11px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url("/static/img/r_play-g.png");
+}
+.qplybtn:hover{
+    background-image: url("/static/img/r_play-r.png");
+}
 .addlstbtn{
     position: relative;
     left: 2px;
@@ -64,6 +77,21 @@ table, th{
     background-image: url("/static/img/addlist16-g.png");
 }
 .addlstbtn:hover{
+    background-image: url("/static/img/addlist16-r.png");
+}
+
+.qaddlstbtn{
+    position: relative;
+    left: 2px;
+    bottom: 11px;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    background-image: url("/static/img/addlist16-g.png");
+}
+
+.qaddlstbtn:hover{
     background-image: url("/static/img/addlist16-r.png");
 }
 
@@ -158,9 +186,9 @@ table, th{
                     {% endif %}
                         <td>
 {#                            <span class="songurl">http://111.202.98.146/amobile.music.tc.qq.com/{{ song.songid }}.m4a?guid=1848955700&vkey=C08C114212C13878FDA750F8750F259380008C6F0CD8B3ADFA3A08978B500E72C40EF5368645F20DFBB6C901EA0D0A4E815E2D00AC190C19&uin=0&fromtag=66</span>#}
-                            <span class="songurl">http://111.202.98.146/amobile.music.tc.qq.com/{{ song.songid }}.m4a?guid=1848955700&vkey=8F6B71A3D50142BEE21F1FE6C9B1F217B181DDDDDD845C98CF5CF309AE5C0969142E6CE72EA39A3A5A8DB1D43531AB309179D71F2BB8BC40&uin=0&fromtag=66</span>
-                            <span class="plybtn"></span>
-                            <span class="addlstbtn"></span>
+                            <span class="songurl">{{ song.songid }}</span>
+                            <span class="qplybtn"></span>
+                            <span class="qaddlstbtn"></span>
                         </td>
                         <td title="{{ song.songname }}">{{ song.songname|truncatechars:30 }}</td>
                         <td>{{ song.tottime }}</td>
