@@ -1,35 +1,33 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpResponse
-from django.shortcuts import render
+
 from .models import *
 
 # Create your views here.
 def register_views(request):
     if request.method.upper() == 'GET':
-        uname = request.GET['username']
-        user = User.objects.filter(uname=uname).first()
+        username = request.GET['username']
+        user = User.objects.filter(username=username).first()
         if user:
             return HttpResponse('该用户名已被占用')
         else:
             return HttpResponse('&#12288;')
 
     else:
-        uname = request.POST['username']
-        upwd = request.POST['userpwd']
-        uemail = request.POST.get('useremail')
+        username = request.POST['username']
+        password = request.POST['userpwd']
+        email = request.POST.get('useremail','')
 
-        upwd = make_password(upwd,'Kmusic','pbkdf2_sha1')
         try:
-            if uemail:
-                user = User.objects.create(uname=uname,upwd=upwd,uemail=uemail)
-            else:
-                user = User.objects.create(uname=uname,upwd=upwd)
+            user = User.objects.create(username=username,email=email)
+            user.set_password(password)
+            user.save()
             request.session['user_id'] = user.id
-            request.session['user_name'] = user.uname
+            request.session['user_name'] = user.username
             return HttpResponse('ok')
-        except:
+        except Exception as e:
+            print(e)
             return HttpResponse('fail')
-
 
 def logout_views(request):
     del request.session['user_id']
@@ -48,17 +46,18 @@ def login_views(request):
         isSave = request.POST.get('issave')
         if isSave == 'false':
             isSave = False
-        user = User.objects.filter(uname=username).first()
+        user = User.objects.filter(username=username).first()
         if user:
-            if check_password(upwd,user.upwd):
+            if check_password(upwd,user.password):
                 request.session['user_id'] = user.id
-                request.session['user_name'] = user.uname
+                request.session['user_name'] = user.username
                 response = HttpResponse('ok')
                 if isSave:
                     response.set_cookie('user_id', user.id)
-                    response.set_cookie('user_name', user.uname)
+                    response.set_cookie('user_name', user.username)
                 return response
             else:
                 return HttpResponse('密码错误')
         else:
             return HttpResponse('无效的用户名')
+

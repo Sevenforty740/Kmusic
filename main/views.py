@@ -63,7 +63,6 @@ def songList_views(request):
 def chgSongList_views(request):
     user_id = request.session.get('user_id')
     list_name = request.GET.get('listname')
-    songlists = Songlist.objects.filter(user_id=user_id).all()
     list = Songlist.objects.filter(user_id=user_id,listname=list_name).first()
     songs = Song.objects.filter(songlist_id=list.id).all()
 
@@ -75,9 +74,7 @@ def addSong_views(request):
         if request.session.get('user_id'):
             user_id = request.session['user_id']
             songlists = Songlist.objects.filter(user_id=user_id).all()
-            songlists_l = []
-            for songlist in songlists:
-                songlists_l.append(songlist.listname)
+            songlists_l = [songlist.listname for songlist in songlists]
             songlists_l = json.dumps(songlists_l)
             return HttpResponse(songlists_l)
         else:
@@ -160,7 +157,7 @@ def qPlaySong_views(request):
             'filename': 'C400{}.m4a'.format(mid),
             'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
         }
-        res = requests.get(vkey_url, data, verify=False)
+        res = requests.get(vkey_url, params=data, verify=False)
         res = json.loads(res.text[36:-1])
         vkey = res['data']['items'][0]['vkey']
         url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(mid,vkey)

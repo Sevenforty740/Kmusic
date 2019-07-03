@@ -20,4 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('^user/',include('userinfo.urls')),
     re_path('^',include('main.urls')),
+    re_path('^api/v1/', include('api.urls')),
+
 ]

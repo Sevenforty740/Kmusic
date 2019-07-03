@@ -44,7 +44,7 @@ class MusicSearcher():
 			  'w={}&flag_qc=0&remoteplace=txt.newclient.top&'.format(urllib.parse.quote(self.target)) +\
 			  'new_json=1&auto=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0&pcachetime={}'.format(nowtime)
 
-        response = self.s.get(url,headers=self.headers,cookies=cookie)
+        response = self.s.get(url,headers=self.headers)
         r_d = json.loads(response.text)
         r_l = r_d['data']['song']['list']
         resultList = ['qq']
