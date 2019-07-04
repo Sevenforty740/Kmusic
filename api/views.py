@@ -320,8 +320,8 @@ class SearchView(APIView):
                 'msg':None,
                 'data':{
                     'target': target,
-                    'qqRes': first,
-                    'netEaseRes': q.get()
+                    'qqRes': first[1:],
+                    'netEaseRes': q.get()[1:]
                 }
             }
         else:
@@ -330,8 +330,8 @@ class SearchView(APIView):
                 'msg': None,
                 'data': {
                     'target': target,
-                    'netEaseRes': first,
-                    'qqRes': q.get()
+                    'netEaseRes': first[1:],
+                    'qqRes': q.get()[1:]
                 }
             }
         return Response(data=res)
