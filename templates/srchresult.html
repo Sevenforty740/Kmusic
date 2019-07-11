@@ -143,21 +143,21 @@ table, th{
                 </tr>
             </thead>
             <tbody>
-                {% for song in netEaseRes|slice:"1:" %}
+                {% for song in netease|slice:"1:" %}
                     {% if forloop.counter|divisibleby:2 %}
                         <tr class="even">
                     {% else %}
                         <tr>
                     {% endif %}
                         <td>
-                            <span class="songurl">http://music.163.com/song/media/outer/url?id={{ song.songid }}.mp3</span>
+                            <span class="songurl">http://music.163.com/song/media/outer/url?id={{ song.id }}.mp3</span>
                             <span class="plybtn"></span>
                             <span class="addlstbtn"></span>
                         </td>
-                        <td title="{{ song.songname }}">{{ song.songname|truncatechars:29 }}</td>
-                        <td>{{ song.tottime }}</td>
-                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.singername }}</a></td>
-                        <td title="{{ song.albumname }}">{{ song.albumname|truncatechars:25 }}</td>
+                        <td title="{{ song.name }}">{{ song.name|truncatechars:29 }}</td>
+                        <td>{{ song.duration }}</td>
+                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.artist }}</a></td>
+                        <td title="{{ song.album }}">{{ song.album|truncatechars:25 }}</td>
                     </tr>
                 {% endfor %}
 
@@ -178,22 +178,22 @@ table, th{
                 </tr>
             </thead>
             <tbody>
-                {% for song in qqRes|slice:"1:" %}
+                {% for song in qq|slice:"1:" %}
                     {% if forloop.counter|divisibleby:2 %}
                         <tr class="even">
                     {% else %}
                         <tr>
                     {% endif %}
                         <td>
-{#                            <span class="songurl">http://111.202.98.146/amobile.music.tc.qq.com/{{ song.songid }}.m4a?guid=1848955700&vkey=C08C114212C13878FDA750F8750F259380008C6F0CD8B3ADFA3A08978B500E72C40EF5368645F20DFBB6C901EA0D0A4E815E2D00AC190C19&uin=0&fromtag=66</span>#}
-                            <span class="songurl">{{ song.songid }}</span>
+{#                            <span class="songurl">http://111.202.98.146/amobile.music.tc.qq.com/{{ song.id }}.m4a?guid=1848955700&vkey=C08C114212C13878FDA750F8750F259380008C6F0CD8B3ADFA3A08978B500E72C40EF5368645F20DFBB6C901EA0D0A4E815E2D00AC190C19&uin=0&fromtag=66</span>#}
+                            <span class="songurl">{{ song.id }}</span>
                             <span class="qplybtn"></span>
                             <span class="qaddlstbtn"></span>
                         </td>
-                        <td title="{{ song.songname }}">{{ song.songname|truncatechars:30 }}</td>
-                        <td>{{ song.tottime }}</td>
-                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.singername }}</a></td>
-                        <td title="{{ song.albumname }}">{{ song.albumname|truncatechars:25 }}</td>
+                        <td title="{{ song.name }}">{{ song.name|truncatechars:30 }}</td>
+                        <td>{{ song.duration }}</td>
+                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.artist }}</a></td>
+                        <td title="{{ song.album }}">{{ song.album|truncatechars:25 }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

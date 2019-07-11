@@ -30,23 +30,25 @@ def search_views(request):
     searcher = MusicSearcher(target,q)
     threadQQ =Thread(target=searcher.qqSearch)
     threadnetE = Thread(target=searcher.netEaseSearch)
+    threadkuWo = Thread(target=searcher.kuWoSearch)
     threadQQ.start()
     threadnetE.start()
+    threadkuWo.start()
     threadQQ.join()
     threadnetE.join()
+    threadkuWo.join()
     first = q.get()
-    if first[0] == 'qq':
-        params = {
-            'target':target,
-            'qqRes': first,
-            'netEaseRes':q.get()
-        }
-    else:
-        params = {
-            'target': target,
-            'netEaseRes':first,
-            'qqRes':q.get()
-        }
+    second = q.get()
+    third = q.get()
+
+    params = {
+        'target':target,
+        first[0]: first,
+        second[0]:second,
+        third[0]:third
+    }
+
+
     return render(request, 'srchresult.html', params)
 
 

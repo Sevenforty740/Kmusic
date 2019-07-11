@@ -9,42 +9,6 @@ from django.middleware.csrf import get_token
 from main.apis.musicsearcher import *
 from rest_framework import exceptions
 
-class APIMusicSearcher(MusicSearcher):
-    def netEaseSearch(self):
-        self.headers['Host'] = 'music.163.com'
-        self.headers['Referer'] = 'http://music.163.com/'
-
-        data = {
-            's': self.target,
-            'offset': '0',
-            'limit': '100',
-            'type': '1'
-        }
-
-        url = 'https://music.163.com/weapi/cloudsearch/get/web'
-        # 获得params encSecKey两个加密参数
-        data = encrypted_request(data)
-        response = self.s.post(url, data=data, headers=self.headers)
-        r_d = json.loads(response.text)
-        r_l = r_d['result']['songs']
-
-        resultList = ['netease']
-        for song in r_l:
-            songDic = {}
-            songDic['songname'] = song['name']
-            id = song['id']
-            songDic['songid'] = id
-            songDic['tottime'] = getNeTime(song['dt'])
-            songDic['singerid'] = song['ar'][0]['id']
-            songDic['singername'] = song['ar'][0]['name']
-            songDic['albumid'] = song['al']['id']
-            songDic['albumname'] = song['al']['name']
-            songDic['albumpic'] = song['al']['picUrl']
-            songDic['playurl'] = "http://music.163.com/song/media/outer/url?id={}.mp3".format(id)
-            resultList.append(songDic)
-
-        self.q.put(resultList)
-
 # Create your views here.
 
 class CsrfView(APIView):
@@ -304,34 +268,31 @@ class SearchView(APIView):
     def get(self,request,*args,**kwargs):
         q = Queue()
         target = urllib.parse.unquote(request.query_params.get('keyword'))
-        searcher = APIMusicSearcher(target, q)
+        searcher = MusicSearcher(target, q)
         threadQQ = Thread(target=searcher.qqSearch)
         threadnetE = Thread(target=searcher.netEaseSearch)
+        threadkuWo = Thread(target=searcher.kuWoSearch)
         threadQQ.start()
         threadnetE.start()
+        threadkuWo.start()
         threadQQ.join()
         threadnetE.join()
+        threadkuWo.join()
         first = q.get()
-        if first[0] == 'qq':
-            res = {
-                'error':0,
-                'msg':None,
-                'data':{
-                    'target': target,
-                    'qqRes': first[1:],
-                    'netEaseRes': q.get()[1:]
-                }
+        second = q.get()
+        third = q.get()
+
+        res = {
+            'error':0,
+            'msg':None,
+            'data':{
+                'target': target,
+                first[0]: first[1:],
+                second[0]: second[1:],
+                third[0]:third[1:]
             }
-        else:
-            res = {
-                'error': 0,
-                'msg': None,
-                'data': {
-                    'target': target,
-                    'netEaseRes': first[1:],
-                    'qqRes': q.get()[1:]
-                }
-            }
+        }
+
         return Response(data=res)
 
 

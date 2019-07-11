@@ -50,13 +50,14 @@ class MusicSearcher():
         resultList = ['qq']
         for song in r_l:
             songDic = {}
-            songDic['songname'] = song['name']
-            songDic['songid'] = song['mid']
-            songDic['tottime'] = getQQTime(song['interval'])
-            songDic['singerid'] = song['singer'][0]['id']
-            songDic['singername'] = song['singer'][0]['name']
+            songDic['source'] = 'qq'
+            songDic['name'] = song['name']
+            songDic['id'] = song['mid']
+            songDic['duration'] = getQQTime(song['interval'])
+            songDic['artistid'] = song['singer'][0]['id']
+            songDic['artist'] = song['singer'][0]['name']
             songDic['albumid'] = song['album']['id']
-            songDic['albumname'] = song['album']['name']
+            songDic['album'] = song['album']['name']
             resultList.append(songDic)
 
         self.q.put(resultList)
@@ -83,15 +84,50 @@ class MusicSearcher():
         resultList = ['netease']
         for song in r_l:
             songDic = {}
-            songDic['songname'] = song['name']
-            songDic['songid'] = song['id']
-            songDic['tottime'] = getNeTime(song['dt'])
-            songDic['singerid'] = song['ar'][0]['id']
-            songDic['singername'] = song['ar'][0]['name']
+            songDic['source'] = 'netease'
+            songDic['name'] = song['name']
+            songDic['id'] = song['id']
+            songDic['duration'] = getNeTime(song['dt'])
+            songDic['artistid'] = song['ar'][0]['id']
+            songDic['artist'] = song['ar'][0]['name']
             songDic['albumid'] = song['al']['id']
-            songDic['albumname'] = song['al']['name']
+            songDic['album'] = song['al']['name']
             songDic['albumpic'] = song['al']['picUrl']
             resultList.append(songDic)
+
+        self.q.put(resultList)
+
+    def kuWoSearch(self):
+        self.headers['Host'] = 'www.kuwo.cn'
+        self.headers['Referer'] = 'http://www.kuwo.cn/'
+
+        search_params = {
+            'key': self.target,
+            'pn': '1',
+            'rn': '100',
+            'reqId': 'b6168da1-a385-11e9-b78e-a5d90de9d862'
+        }
+        search_url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
+
+        res = self.s.get(search_url, params=search_params)
+        search_res_dict = json.loads(res.text)
+        resultList = ['kuwo']
+
+        for song in search_res_dict['data']['list']:
+            d = {}
+            d['source'] = 'kuwo'
+            d['name'] = song['name']
+            d['id'] = song['rid']
+            d['artist'] = song['artist']
+            d['artistid'] = song['artistid']
+            d['album'] = song['album']
+            d['albumid'] = song['albumid']
+            try:
+                d['albumpic'] = song['albumpic']
+            except:
+                pass
+            d['duration'] = song['songTimeMinutes']
+            resultList.append(d)
 
         self.q.put(resultList)
 
