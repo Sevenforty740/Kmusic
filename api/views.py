@@ -122,8 +122,6 @@ class SongListView(APIView):
     """
     增删改查单个歌单
     """
-    permission_classes = []
-
     def get(self, request, *args, **kwargs):
         """查询某个歌单详细内容"""
         user_id = request.user.id

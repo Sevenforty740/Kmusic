@@ -11,6 +11,5 @@ def jwt_response_username_userid_token(token,user=None,request=None):
         'token':token,
         'username':user.username,
         'user_id':user.id,
-        'regist_time':user.last_login
     }
     return data
