@@ -40,7 +40,7 @@ class MusicSearcher():
         nowtime = int(time.time())
 
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp?format=json&t=0&loginUin=0&inCharset=GB2312&'+\
-			  'outCharset=utf-8&qqmusic_ver=1653&catZhida=1&p=1&n=100&'+\
+			  'outCharset=utf-8&qqmusic_ver=1653&catZhida=1&p=1&n=60&'+\
 			  'w={}&flag_qc=0&remoteplace=txt.newclient.top&'.format(urllib.parse.quote(self.target)) +\
 			  'new_json=1&auto=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0&pcachetime={}'.format(nowtime)
 
@@ -70,14 +70,14 @@ class MusicSearcher():
         data = {
             's': self.target,
             'offset': '0',
-            'limit': '100',
+            'limit': '60',
             'type': '1'
         }
 
         url = 'https://music.163.com/weapi/cloudsearch/get/web'
         # 获得params encSecKey两个加密参数
         data = encrypted_request(data)
-        response = self.s.post(url,data=data,headers=self.headers)
+        response = self.s.post(url, data=data, headers=self.headers)
         r_d = json.loads(response.text)
         r_l = r_d['result']['songs']
 
@@ -104,7 +104,7 @@ class MusicSearcher():
         search_params = {
             'key': self.target,
             'pn': '1',
-            'rn': '100',
+            'rn': '60',
             'reqId': 'b6168da1-a385-11e9-b78e-a5d90de9d862'
         }
         search_url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
