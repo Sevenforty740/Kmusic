@@ -11,7 +11,7 @@ body{
 }
 
 table{
-    width: 700px;
+    width: 450px;
     text-align: center;
     float: left;
     padding: 0;
@@ -40,6 +40,12 @@ table, th{
     height: 20px;
     visibility: hidden;
 }
+.idsource{
+    display: block;
+    width: 50px;
+    height: 8px;
+    visibility: hidden;
+}
 .plybtn{
     cursor: pointer;
     position: relative;
@@ -53,19 +59,7 @@ table, th{
 .plybtn:hover{
     background-image: url("/static/img/r_play-r.png");
 }
-.qplybtn{
-    cursor: pointer;
-    position: relative;
 
-    bottom: 11px;
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    background-image: url("/static/img/r_play-g.png");
-}
-.qplybtn:hover{
-    background-image: url("/static/img/r_play-r.png");
-}
 .addlstbtn{
     position: relative;
     left: 2px;
@@ -139,7 +133,7 @@ table, th{
                     <th>歌曲</th>
                     <th width="55px">时长</th>
                     <th width="95px">歌手</th>
-                    <th width="200px">专辑</th>
+                    <th width="100px">专辑</th>
                 </tr>
             </thead>
             <tbody>
@@ -150,7 +144,8 @@ table, th{
                         <tr>
                     {% endif %}
                         <td>
-                            <span class="songurl">http://music.163.com/song/media/outer/url?id={{ song.id }}.mp3</span>
+                            <span class="idsource">{{ song.song_id }}|{{ song.source }}</span>
+                            <span class="songurl"></span>
                             <span class="plybtn"></span>
                             <span class="addlstbtn"></span>
                         </td>
@@ -174,7 +169,7 @@ table, th{
                     <th>歌曲</th>
                     <th width="55px">时长</th>
                     <th width="95px">歌手</th>
-                    <th width="200px">专辑</th>
+                    <th width="100px">专辑</th>
                 </tr>
             </thead>
             <tbody>
@@ -185,10 +180,45 @@ table, th{
                         <tr>
                     {% endif %}
                         <td>
-{#                            <span class="songurl">http://111.202.98.146/amobile.music.tc.qq.com/{{ song.id }}.m4a?guid=1848955700&vkey=C08C114212C13878FDA750F8750F259380008C6F0CD8B3ADFA3A08978B500E72C40EF5368645F20DFBB6C901EA0D0A4E815E2D00AC190C19&uin=0&fromtag=66</span>#}
-                            <span class="songurl">{{ song.id }}</span>
-                            <span class="qplybtn"></span>
-                            <span class="qaddlstbtn"></span>
+                            <span class="idsource">{{ song.song_id }}|{{ song.source }}</span>
+                            <span class="songurl"></span>
+                            <span class="plybtn"></span>
+                            <span class="addlstbtn"></span>
+                        </td>
+                        <td title="{{ song.name }}">{{ song.name|truncatechars:30 }}</td>
+                        <td>{{ song.duration }}</td>
+                        <td><a href="javascript:void(0);" class="srchsinger">{{ song.artist }}</a></td>
+                        <td title="{{ song.album }}">{{ song.album|truncatechars:25 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <table cellspacing='0' id="kuwo">
+            <thead>
+                <tr>
+                    <th colspan="5">酷我音乐</th>
+                </tr>
+                <tr>
+                    <th width="50px"></th>
+                    <th>歌曲</th>
+                    <th width="55px">时长</th>
+                    <th width="95px">歌手</th>
+                    <th width="100px">专辑</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in kuwo|slice:"1:" %}
+                    {% if forloop.counter|divisibleby:2 %}
+                        <tr class="even">
+                    {% else %}
+                        <tr>
+                    {% endif %}
+                        <td>
+                            <span class="idsource">{{ song.song_id }}|{{ song.source }}</span>
+                            <span class="songurl">{{ song.song_id }}|{{ song.source }}</span>
+                            <span class="plybtn"></span>
+                            <span class="addlstbtn"></span>
                         </td>
                         <td title="{{ song.name }}">{{ song.name|truncatechars:30 }}</td>
                         <td>{{ song.duration }}</td>

@@ -1,5 +1,7 @@
 from threading import Thread
-import logging,urllib,re
+import logging
+import urllib
+import re
 from queue import Queue
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,13 +9,16 @@ from django.http import JsonResponse
 from main.models import *
 from django.middleware.csrf import get_token
 from main.apis.musicsearcher import *
-from rest_framework import exceptions
+import requests
+import base64
+
 
 # Create your views here.
 
 class CsrfView(APIView):
     """
-    获取Csrf_token
+    获取Csrf_token \n
+    :return: csrf_token
     """
     permission_classes = []
 
@@ -28,11 +33,17 @@ class CsrfView(APIView):
 
 
 class PasswordView(APIView):
-    """修改密码"""
-    def put(self,request,*args,**kwargs):
+    """
+    修改密码 \n
+    :Headers Authorization: JWT + ' ' + token \n
+    :param old_password: 原密码string \n
+    :param new_password: 新密码string \n
+    :return: 成功或失败
+    """
+    def put(self, request, *args, **kwargs):
         res = {
-            'error':0,
-            'msg':None
+            'error': 0,
+            'msg': None
         }
 
         user = request.user
@@ -55,7 +66,9 @@ class PasswordView(APIView):
 
 class SongListsView(APIView):
     """
-    用户歌单列表概况
+    用户歌单列表概况 \n
+    :Headers Authorization: JWT + ' ' + token \n
+    :return: 该用户所有歌单概况
     """
 
     def get(self, request, *args, **kwargs):
@@ -86,8 +99,14 @@ class SongListView(APIView):
     """
     增删改查单个歌单
     """
+
     def get(self, request, *args, **kwargs):
-        """查询某个歌单详细内容"""
+        """
+        查询某个歌单详细内容 \n
+        :Headers Authorization: JWT + ' ' + token \n
+        :param list_id: 歌单id \n
+        :return: 成功或失败
+        """
         user_id = request.user.id
         list_id = request.query_params.get('list_id')
 
@@ -105,11 +124,12 @@ class SongListView(APIView):
         try:
             songlist = Songlist.objects.get(
                 id=list_id, user_id=user_id, isdelete=False)
-            res['data']['songs'] = [{"id": song.id,
+            res['data']['songs'] = [{"song_id": song.songid,
+                                     "source": song.source,
                                      "name": song.name,
-                                     "singer": song.singer,
-                                     "duration": song.duration,
-                                     "url": song.url} for song in songlist.song_set.all()]
+                                     "artist": song.artist,
+                                     "duration": song.duration
+                                     } for song in songlist.song_set.all()]
             res['data']['list_name'] = songlist.listname
 
         except Exception as e:
@@ -120,7 +140,12 @@ class SongListView(APIView):
         return Response(data=res)
 
     def post(self, request, *args, **kwargs):
-        """新建一个歌单"""
+        """
+        新建一个歌单 \n
+        :Headers Authorization: JWT + ' ' + token \n
+        :param list_name: 新建的歌单名称 \n
+        :return: 成功或失败  歌单id：list_id  歌单名称list_name
+        """
         res = {
             "error": 0,
             "msg": "",
@@ -157,7 +182,13 @@ class SongListView(APIView):
             return JsonResponse(res)
 
     def put(self, request, *args, **kwargs):
-        """更改歌单名称"""
+        """
+        更改歌单名称 \n
+        :Headers Authorization: JWT + ' ' + token \n
+        :param list_name: 修改前的歌单名称 \n
+        :param new_name:  修改后的歌单名称 \n
+        :return: 成功或失败  歌单id：list_id  歌单名称list_name
+        """
         res = {
             "error": 0,
             "msg": "",
@@ -192,7 +223,12 @@ class SongListView(APIView):
         return JsonResponse(res)
 
     def delete(self, request, *args, **kwargs):
-        """删除歌单"""
+        """
+        删除歌单 \n
+        :Headers Authorization: JWT + ' ' + token \n
+        :param list_name: 要删除的歌单名称 \n
+        :return: 成功或失败
+        """
         user_id = request.user.id
         list_name = request.data.get('list_name')
         try:
@@ -218,27 +254,48 @@ class SongListView(APIView):
 class SongView(APIView):
     """歌曲在歌单中的添加与删除"""
 
-    def post(self,request,*args,**kwargs):
-        """歌单中添加歌曲"""
+    def post(self, request, *args, **kwargs):
+        """
+        歌单中添加歌曲 \n
+        :Headers Authorization: JWT + ' ' + token \n
+        :param list_id: 歌单id \n
+        :param song_id: 搜索接口返回的song_id \n
+        :param source: 搜索接口返回的来源source \n
+        :param song_name: 搜索接口返回的歌名name \n
+        :param artist: 搜索接口返回的歌手artist \n
+        :param duration: 搜索接口返回的时长duration \n
+        :return: 成功或失败
+        """
         user_id = request.user.id
-        listname = request.data.get('listname')
-        songurl = request.data.get('songurl')
-        songurl = re.sub('&amp;', '&', songurl)
-        songname = request.data.get('songname')
-        singer = request.data.get('singer')
-        singer = re.sub('&nbsp;', ' ', singer)
+        list_id = request.data.get('list_id')
+        song_id = request.data.get('song_id')
+        source = request.data.get('source')
+        songname = request.data.get('song_name')
+        artist = request.data.get('artist')
+        artist = re.sub('&nbsp;', ' ', artist)
         duration = request.data.get('duration')
-        songlist = Songlist.objects.filter(user_id=user_id, listname=listname,isdelete=False).first()
-        isExists = Song.objects.filter(url=songurl, name=songname, songlist_id=songlist.id).first()
+        songlist = Songlist.objects.filter(
+            user_id=user_id, id=list_id, isdelete=False).first()
+        isExists = Song.objects.filter(
+            songid=song_id,
+            source=source,
+            name=songname,
+            songlist_id=songlist.id).first()
         if isExists:
             res = {
-                "error":1,
-                "msg":"该歌曲已经在歌单中",
-                "data":None
+                "error": 1,
+                "msg": "该歌曲已经在歌单中",
+                "data": None
             }
             return JsonResponse(res)
         else:
-            Song.objects.create(url=songurl, name=songname, singer=singer, duration=duration, songlist_id=songlist.id)
+            Song.objects.create(
+                songid=song_id,
+                source=source,
+                name=songname,
+                artist=artist,
+                duration=duration,
+                songlist_id=songlist.id)
             res = {
                 "error": 0,
                 "msg": "添加成功",
@@ -246,26 +303,57 @@ class SongView(APIView):
             }
             return JsonResponse(res)
 
-    def delete(self,request,*args,**kwargs):
+    def delete(self, request, *args, **kwargs):
+        """
+        歌单中删除歌曲 \n
+        :Headers Authorization: JWT + ' ' + token \n
+        :param list_id: 歌单id \n
+        :param song_id: 搜索接口返回的song_id \n
+        :param source: 搜索接口返回的来源source \n
+        :return: 成功或失败
+        """
         user_id = request.user.id
-        listname = request.data.get('listname')
-        songname = request.data.get('songname')
-        duration = request.data.get('duration')
-        songlist = Songlist.objects.filter(user_id=user_id, listname=listname,isdelete=False).first()
-        song = Song.objects.filter(songlist_id=songlist.id, name=songname, duration=duration).first()
-        song.delete()
-        res = {
-            "error":0,
-            "msg":"歌曲已删除",
-            "data":None
-        }
+        list_id = request.data.get('list_id')
+        song_id = request.data.get('song_id')
+        source = request.data.get('source')
+        songlist = Songlist.objects.filter(
+            user_id=user_id, id=list_id, isdelete=False).first()
+        if songlist:
+            song = Song.objects.filter(
+                songlist_id=list_id,
+                songid=song_id,
+                source=source).first()
+            if song:
+                song.delete()
+                res = {
+                    "error": 0,
+                    "msg": "歌曲已删除",
+                    "data": None
+                }
+            else:
+                res = {
+                    "error": 1,
+                    "msg": "提供的信息有误",
+                    "data": None
+                }
+        else:
+            res = {
+                "error": 1,
+                "msg": "提供的信息有误",
+                "data": None
+            }
         return JsonResponse(res)
 
 
 class SearchView(APIView):
-    """搜索"""
+    """
+    搜索 \n
+    :param keyword: 搜索关键字 \n
+    :return: qq netease kuwo 三家详细搜索结果
+    """
     permission_classes = []
-    def get(self,request,*args,**kwargs):
+
+    def get(self, request, *args, **kwargs):
         q = Queue()
         target = urllib.parse.unquote(request.query_params.get('keyword'))
         searcher = MusicSearcher(target, q)
@@ -283,62 +371,104 @@ class SearchView(APIView):
         third = q.get()
 
         res = {
-            'error':0,
-            'msg':None,
-            'data':{
+            'error': 0,
+            'msg': None,
+            'data': {
                 'target': target,
                 first[0]: first[1:],
                 second[0]: second[1:],
-                third[0]:third[1:]
+                third[0]: third[1:]
             }
         }
 
         return Response(data=res)
 
 
-class QPlaysong(APIView):
-    """QQ的歌曲获得最终的完整url"""
+class GetUrl(APIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
-        mid = request.data.get('mid')
-        vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
-        data = {
-            'g_tk': '195219765',
-            'jsonpCallback': 'MusicJsonCallback004680169373158849',
-            'loginUin': '125045209',
-            'hostUin': '0',
-            'format': 'json',
-            'inCharset': 'utf8',
-            'outCharset': 'utf-8',
-            'notice': '0',
-            'platform': 'yqq',
-            'needNewCode': '0',
-            'cid': '205361747',
-            'callback': 'MusicJsonCallback004680169373158849',
-            'uin': '125045209',
-            'songmid': mid,
-            'filename': 'C400{}.m4a'.format(mid),
-            'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
-        }
-        qres = requests.get(vkey_url, params=data, verify=False)
-        qres = json.loads(qres.text[36:-1])
-        vkey = qres['data']['items'][0]['vkey']
-        url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(
-            mid, vkey)
-
-        res = {
-            "error" : 0,
-            "msg":None,
-            "data":{
-                "url":url,
+        """
+        根据搜索接口获得的歌曲id 获取歌曲播放及下载url \n
+        :param song_id: 歌曲id \n
+        :param source: 歌曲来源\n
+        :return: 歌曲url
+        """
+        songid = request.data.get('song_id')
+        source = request.data.get('source')
+        if source == 'netease':
+            url = "http://music.163.com/song/media/outer/url?id={}.mp3".format(
+                songid)
+            res = {
+                'code': 200,
+                'msg': 'success',
+                'url': url
             }
-        }
+
+        elif source == 'qq':
+            vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
+            data = {
+                'g_tk': '195219765',
+                'jsonpCallback': 'MusicJsonCallback004680169373158849',
+                'loginUin': '125045209',
+                'hostUin': '0',
+                'format': 'json',
+                'inCharset': 'utf8',
+                'outCharset': 'utf-8',
+                'notice': '0',
+                'platform': 'yqq',
+                'needNewCode': '0',
+                'cid': '205361747',
+                'callback': 'MusicJsonCallback004680169373158849',
+                'uin': '125045209',
+                'songmid': songid,
+                'filename': 'C400{}.m4a'.format(songid),
+                'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
+            }
+            res = requests.get(vkey_url, params=data, verify=False)
+            res = json.loads(res.text[36:-1])
+            vkey = res['data']['items'][0]['vkey']
+            url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(
+                songid, vkey)
+            res = {
+                'code': 200,
+                'msg': 'success',
+                'url': url
+            }
+
+        elif source == 'kuwo':
+
+            url_params = {
+                'format': 'mp3',
+                'rid': songid,
+                'response': 'url',
+                'type': 'convert_url3',
+                'br': '320kmp3',
+                'from': 'web',
+                't': str(int(time.time() * 1000)),
+                'reqId': '3cb750f1-a387-11e9-bf69-fbb42f0bf2bb'
+            }
+
+            res = requests.get('http://www.kuwo.cn/url', params=url_params)
+            res = json.loads(res.text)
+
+        else:
+            res = {
+                'code': 404,
+                'msg': 'Song Not Found'
+            }
+
         return JsonResponse(res)
 
 
 class Register(APIView):
-    """注册用户"""
+    """
+    注册用户 \n
+    :param username: 用户名 \n
+    :param password: 密码 \n
+    :param email: 邮箱 可选填 \n
+    :return: 成功或失败 userid，username
+    """
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
@@ -353,7 +483,7 @@ class Register(APIView):
             res['error'] = 1
             res['msg'] = "该用户名已被占用"
         else:
-            email = request.data.get('email')
+            email = request.data.get('email', '')
             password = request.data.get('password')
             user = User.objects.create(username=username, email=email)
             user.set_password(password)
@@ -365,3 +495,151 @@ class Register(APIView):
             }
         return JsonResponse(res)
 
+
+class GetLyric(APIView):
+    """
+    获取歌词接口 \n
+    :param song_id: 歌曲id \n
+    :param source: 歌曲来源 \n
+    :return: 歌词字符串
+    """
+
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        songid = request.query_params.get('song_id')
+        source = request.query_params.get('source')
+
+        if source == 'kuwo':
+            lyric_url = 'http://m.kuwo.cn/newh5/singles/songinfoandlrc?musicId={}'.format(
+                songid)
+            res = requests.get(lyric_url)
+            res.encoding = "utf-8"
+            res = json.loads(res.text)
+            lyric_kuwo = res['data']['lrclist']
+
+            def timeformat(time):
+                time = float(time)
+                minute = time // 60
+                second = round(time - minute * 60, 3)
+                return "[%02d:%06.3f]" % (minute, second)
+
+            lyric_format = "\n".join(
+                [timeformat(line['time']) + line['lineLyric'] for line in lyric_kuwo])
+
+            res = {
+                'error': 0,
+                'msg': 'success',
+                'data': {
+                    'lyric': lyric_format
+                }
+            }
+
+        elif source == 'netease':
+            lyric_url = 'http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1'.format(
+                songid)
+            res = requests.get(lyric_url)
+            res.encoding = 'utf-8'
+            res = json.loads(res.text)
+            res = {
+                'error': 0,
+                'msg': 'success',
+                'data': {
+                    'lyric': res['lrc']['lyric']
+                }
+            }
+
+        elif source == 'qq':
+            headers = {
+                'Connection': 'Keep-Alive',
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'zh-CN',
+                'Accept': '*/*',
+                'User-Agent': 'Mozilla/5.0(compatible;MSIE 9.0;Windows NT 6.1;WOW64;Trident/5.0)',
+                'Host': 'c.y.qq.com',
+                'Referer': 'c.y.qq.com',
+            }
+
+            lyric_url1 = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+            params = {
+                '-': 'MusicJsonCallback_lrc',
+                'pcachetime': '1563195700005',
+                'songmid': songid,
+                'g_tk': '5381',
+                'loginUin': '0',
+                'hostUin': '0',
+                'format': 'json',
+                'inCharset': 'utf8',
+                'outCharset': 'utf - 8',
+                'notice': '0',
+                'platform': 'yqq.json',
+                'needNewCode': '0',
+            }
+            res1 = requests.get(lyric_url1, params=params, headers=headers)
+            res1 = json.loads(res1.text)
+            lyric = base64.b64decode(res1['lyric']).decode()
+            res = {
+                'error': 0,
+                'msg': 'success',
+                'data': {
+                    'lyric': lyric
+                }
+            }
+
+        else:
+            res = {
+                'error': 1,
+                'msg': '参数错误',
+                'data': None
+            }
+
+        return JsonResponse(res)
+
+
+class QQAlbumPic(APIView):
+    """
+    获取qq音乐专辑封面 \n
+    :param album_mid: 只能发送qq音乐专辑mid 也就是搜索接口qq平台返回的album_mid \n
+    :return: qq音乐专辑封面url
+    """
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        try:
+            album_mid = request.query_params.get('album_mid')
+            album_pic_url = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000{}.jpg'.format(
+                album_mid)
+            res = {
+                'error': 0,
+                'msg': 'success',
+                'data': {
+                    'album_pic': album_pic_url
+                }
+            }
+        except BaseException:
+            res = {
+                'error': 1,
+                'msg': '参数错误',
+                'data': None
+            }
+
+        return JsonResponse(res)
+
+
+class RadioView(APIView):
+    """
+    电台搜索接口 暂时只支持网易云 且只支持搜索播放 不能加入歌单 \n
+
+    """
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        keyword = request.query_params.get('keyword')
+
+
+        res = {
+
+        }
+        return JsonResponse(res)

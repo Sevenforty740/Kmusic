@@ -52,11 +52,12 @@ class MusicSearcher():
             songDic = {}
             songDic['source'] = 'qq'
             songDic['name'] = song['name']
-            songDic['id'] = song['mid']
+            songDic['song_id'] = song['mid']
             songDic['duration'] = getQQTime(song['interval'])
-            songDic['artistid'] = song['singer'][0]['id']
+            songDic['artist_id'] = song['singer'][0]['id']
             songDic['artist'] = song['singer'][0]['name']
-            songDic['albumid'] = song['album']['id']
+            songDic['album_id'] = song['album']['id']
+            songDic['album_mid'] = song['album']['mid']
             songDic['album'] = song['album']['name']
             resultList.append(songDic)
 
@@ -86,21 +87,18 @@ class MusicSearcher():
             songDic = {}
             songDic['source'] = 'netease'
             songDic['name'] = song['name']
-            songDic['id'] = song['id']
+            songDic['song_id'] = song['id']
             songDic['duration'] = getNeTime(song['dt'])
-            songDic['artistid'] = song['ar'][0]['id']
+            songDic['artist_id'] = song['ar'][0]['id']
             songDic['artist'] = song['ar'][0]['name']
-            songDic['albumid'] = song['al']['id']
+            songDic['album_id'] = song['al']['id']
             songDic['album'] = song['al']['name']
-            songDic['albumpic'] = song['al']['picUrl']
+            songDic['album_pic'] = song['al']['picUrl']
             resultList.append(songDic)
 
         self.q.put(resultList)
 
     def kuWoSearch(self):
-        self.headers['Host'] = 'www.kuwo.cn'
-        self.headers['Referer'] = 'http://www.kuwo.cn/'
-
         search_params = {
             'key': self.target,
             'pn': '1',
@@ -117,13 +115,13 @@ class MusicSearcher():
             d = {}
             d['source'] = 'kuwo'
             d['name'] = song['name']
-            d['id'] = song['rid']
+            d['song_id'] = song['rid']
             d['artist'] = song['artist']
-            d['artistid'] = song['artistid']
+            d['artist_id'] = song['artistid']
             d['album'] = song['album']
-            d['albumid'] = song['albumid']
+            d['album_id'] = song['albumid']
             try:
-                d['albumpic'] = song['albumpic']
+                d['album_pic'] = song['albumpic']
             except:
                 pass
             d['duration'] = song['songTimeMinutes']

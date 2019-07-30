@@ -1,5 +1,5 @@
 from django.db import models
-from userinfo.models import *
+from userinfo.models import User
 
 # Create your models here.
 class Songlist(models.Model):
@@ -15,9 +15,10 @@ class Songlist(models.Model):
 
 
 class Song(models.Model):
-    url = models.CharField(max_length=250)
+    songid = models.CharField(max_length=200)
+    source = models.CharField(max_length=50)
     name = models.CharField(max_length=200)
-    singer = models.CharField(max_length=200)
+    artist = models.CharField(max_length=200)
     duration = models.CharField(max_length=50)
     songlist = models.ForeignKey(Songlist,on_delete=models.CASCADE)
 

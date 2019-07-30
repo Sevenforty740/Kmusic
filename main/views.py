@@ -1,4 +1,5 @@
 import json,re
+import time
 import urllib
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -14,14 +15,10 @@ q = Queue()  # 用于接收Thread线程的返回值
 
 # Create your views here.
 def index_views(request):
-    if request.session.get('user_id') and request.session.get('user_name'):
-        return render(request,'index.html')
-    else:
-        if request.COOKIES.get('user_id') and request.COOKIES.get('user_name'):
-            request.session['user_id'] = request.COOKIES['user_id']
-            request.session['user_name'] = request.COOKIES['user_name']
-        return  render(request,'index.html')
-
+    if request.COOKIES.get('user_id') and request.COOKIES.get('user_name'):
+        request.session['user_id'] = request.COOKIES['user_id']
+        request.session['user_name'] = request.COOKIES['user_name']
+    return render(request,'index.html')
 
 
 def search_views(request):
@@ -47,8 +44,6 @@ def search_views(request):
         second[0]:second,
         third[0]:third
     }
-
-
     return render(request, 'srchresult.html', params)
 
 
@@ -64,6 +59,7 @@ def songList_views(request):
 
 def chgSongList_views(request):
     user_id = request.session.get('user_id')
+    songlists = Songlist.objects.filter(user_id=user_id).all()
     list_name = request.GET.get('listname')
     list = Songlist.objects.filter(user_id=user_id,listname=list_name).first()
     songs = Song.objects.filter(songlist_id=list.id).all()
@@ -84,28 +80,32 @@ def addSong_views(request):
     else:
         user_id = request.session['user_id']
         songlist_name = request.POST.get('songlist_name')
-        songurl = request.POST.get('songurl')
-        songurl = re.sub('&amp;','&',songurl)
+        song_id = request.POST.get('songid')
+        source = request.POST.get('source')
         songname = request.POST.get('songname')
-        singer = request.POST.get('singer')
-        singer = re.sub('&nbsp;', ' ', singer)
+        artist = request.POST.get('artist')
+        artist = re.sub('&nbsp;', ' ', artist)
+        artist = re.sub('&amp;', '&', artist)
         duration = request.POST.get('duration')
         songlist = Songlist.objects.filter(user_id=user_id,listname=songlist_name).first()
-        isExists = Song.objects.filter(url=songurl,name=songname,songlist_id=songlist.id).first()
+        isExists = Song.objects.filter(songid=song_id, source=source,name=songname,songlist_id=songlist.id).first()
         if isExists:
             return HttpResponse('exists')
         else:
-            Song.objects.create(url=songurl,name=songname,singer=singer,duration=duration,songlist_id=songlist.id)
+            Song.objects.create(songid=song_id, source=source,name=songname,artist=artist,duration=duration,songlist_id=songlist.id)
             return HttpResponse('ok')
 
 
 def listRmSong_views(request):
     user_id = request.session['user_id']
     songlist_name = request.GET.get('listname')
-    songname = request.GET.get('songname')
+    name = request.GET.get('name')
     duration = request.GET.get('duration')
+    source = request.GET.get('source')
+    artist = request.GET.get('artist')
+    artist = re.sub('&amp;', '&', artist)
     songlist = Songlist.objects.filter(user_id=user_id,listname=songlist_name).first()
-    song = Song.objects.filter(songlist_id=songlist.id,name=songname,duration=duration).first()
+    song = Song.objects.filter(songlist_id=songlist.id,name=name, source=source,duration=duration,artist=artist).first()
     song.delete()
     return HttpResponse('remove song ok')
 
@@ -136,33 +136,56 @@ def createList_views(request):
         return redirect('/songlist/')
 
 
-
-def qPlaySong_views(request):
+def getSongUrl_views(request):
     if request.method == 'POST':
-        mid = request.POST.get('mid')
-        vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
-        data = {
-            'g_tk': '195219765',
-            'jsonpCallback': 'MusicJsonCallback004680169373158849',
-            'loginUin': '125045209',
-            'hostUin': '0',
-            'format': 'json',
-            'inCharset': 'utf8',
-            'outCharset': 'utf-8',
-            'notice': '0',
-            'platform': 'yqq',
-            'needNewCode': '0',
-            'cid': '205361747',
-            'callback': 'MusicJsonCallback004680169373158849',
-            'uin': '125045209',
-            'songmid': mid,
-            'filename': 'C400{}.m4a'.format(mid),
-            'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
-        }
-        res = requests.get(vkey_url, params=data, verify=False)
-        res = json.loads(res.text[36:-1])
-        vkey = res['data']['items'][0]['vkey']
-        url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(mid,vkey)
+        songid = request.POST.get('songid')
+        source = request.POST.get('source')
+
+        if source == 'netease':
+            url = "http://music.163.com/song/media/outer/url?id={}.mp3".format(songid)
+
+        elif source == 'qq':
+            vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
+            data = {
+                'g_tk': '195219765',
+                'jsonpCallback': 'MusicJsonCallback004680169373158849',
+                'loginUin': '125045209',
+                'hostUin': '0',
+                'format': 'json',
+                'inCharset': 'utf8',
+                'outCharset': 'utf-8',
+                'notice': '0',
+                'platform': 'yqq',
+                'needNewCode': '0',
+                'cid': '205361747',
+                'callback': 'MusicJsonCallback004680169373158849',
+                'uin': '125045209',
+                'songmid': songid,
+                'filename': 'C400{}.m4a'.format(songid),
+                'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
+            }
+            res = requests.get(vkey_url, params=data, verify=False)
+            res = json.loads(res.text[36:-1])
+            vkey = res['data']['items'][0]['vkey']
+            url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(songid,vkey)
+
+        elif source == 'kuwo':
+            url_params = {
+                'format': 'mp3',
+                'rid': songid,
+                'response': 'url',
+                'type': 'convert_url3',
+                'br': '256kmp3',
+                'from': 'web',
+                't': str(int(time.time() * 1000)),
+                'reqId': '3cb750f1-a387-11e9-bf69-fbb42f0bf2bb'
+            }
+            res = requests.get('http://www.kuwo.cn/url', params=url_params)
+            res = json.loads(res.text)
+            url = res['url']
+        else:
+            url = 'error'
+
         return HttpResponse(url)
 
 
