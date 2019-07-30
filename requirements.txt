@@ -1,4 +1,4 @@
-Django==2.1.4
+Django==2.1.10
 PyMySQL==0.9.3
 pycrypto==2.6.1
 Requests==2.22.0
