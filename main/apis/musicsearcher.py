@@ -1,3 +1,4 @@
+from threading import Thread
 from .netEaseEncode import *
 import requests
 import urllib.parse
@@ -27,15 +28,15 @@ class MusicSearcher():
         self.headers['Host'] = 'c.y.qq.com'
         self.headers['Referer'] = 'c.y.qq.com'
 		
-        cookie = {
-			'qqmusic_gkey' : '92B45FD2E353E84FF288DF16ACE5D5B198CBD33DE8DF7BDF',
-			'qqmusic_gtime' : '0',
-			'qqmusic_guid' : 'B1E901DA7379A44022C5AF79FDD9CD96',
-			'qqmusic_miniversion' : '53',
-			'qqmusic_version' : '16',
-			'qm_hideuin' : '0',
-			'qm_method' : '1'
-		}
+        # cookie = {
+		# 	'qqmusic_gkey' : '92B45FD2E353E84FF288DF16ACE5D5B198CBD33DE8DF7BDF',
+		# 	'qqmusic_gtime' : '0',
+		# 	'qqmusic_guid' : 'B1E901DA7379A44022C5AF79FDD9CD96',
+		# 	'qqmusic_miniversion' : '53',
+		# 	'qqmusic_version' : '16',
+		# 	'qm_hideuin' : '0',
+		# 	'qm_method' : '1'
+		# }
 		
         nowtime = int(time.time())
 
@@ -142,3 +143,4 @@ def getNeTime(ms):
     mi = s//60
     se = s % 60
     return '%02d:%02d'% (mi, se)
+

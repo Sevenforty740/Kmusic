@@ -1,17 +1,15 @@
-from threading import Thread
 import logging
 import urllib
-import re
-from queue import Queue
+import re,math
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.http import JsonResponse
 from main.models import *
 from django.middleware.csrf import get_token
-from main.apis.musicsearcher import *
+from api.search4api import *
 import requests
 import base64
-
+import execjs
+from KMusic.settings import BASE_DIR
 
 # Create your views here.
 
@@ -29,7 +27,7 @@ class CsrfView(APIView):
             "msg": None,
             "data": {"csrf_token": csrf_token}
         }
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class PasswordView(APIView):
@@ -61,7 +59,7 @@ class PasswordView(APIView):
             res['error'] = 1
             res['msg'] = '输入的原密码有误'
 
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class SongListsView(APIView):
@@ -92,7 +90,7 @@ class SongListsView(APIView):
                     "name": songlist.listname,
                     "count": songlist.song_set.count()} for songlist in songlists]
 
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class SongListView(APIView):
@@ -160,7 +158,7 @@ class SongListView(APIView):
         if songlist:
             res["error"] = 1
             res["msg"] = "该歌单名已经存在"
-            return JsonResponse(res)
+            return Response(data=res)
         else:
             songlist = Songlist.objects.filter(
                 user_id=user_id,
@@ -179,7 +177,7 @@ class SongListView(APIView):
                 "list_id": songlist.id,
                 "list_name": songlist.listname,
             }
-            return JsonResponse(res)
+            return Response(data=res)
 
     def put(self, request, *args, **kwargs):
         """
@@ -203,7 +201,7 @@ class SongListView(APIView):
         except Exception as e:
             res['error'] = 1
             res['msg'] = "未找到歌单"
-            return JsonResponse(res)
+            return Response(data=res)
 
         try:
             elist = Songlist.objects.get(
@@ -220,7 +218,7 @@ class SongListView(APIView):
             "list_id": songlist.id,
             "list_name": songlist.listname
         }
-        return JsonResponse(res)
+        return Response(data=res)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -248,7 +246,7 @@ class SongListView(APIView):
                 "msg": "未找到该歌单",
                 "data": {}
             }
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class SongView(APIView):
@@ -287,7 +285,7 @@ class SongView(APIView):
                 "msg": "该歌曲已经在歌单中",
                 "data": None
             }
-            return JsonResponse(res)
+            return Response(data=res)
         else:
             Song.objects.create(
                 songid=song_id,
@@ -301,7 +299,7 @@ class SongView(APIView):
                 "msg": "添加成功",
                 "data": None
             }
-            return JsonResponse(res)
+            return Response(data=res)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -342,7 +340,7 @@ class SongView(APIView):
                 "msg": "提供的信息有误",
                 "data": None
             }
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class SearchView(APIView):
@@ -354,33 +352,9 @@ class SearchView(APIView):
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
-        q = Queue()
         target = urllib.parse.unquote(request.query_params.get('keyword'))
-        searcher = MusicSearcher(target, q)
-        threadQQ = Thread(target=searcher.qqSearch)
-        threadnetE = Thread(target=searcher.netEaseSearch)
-        threadkuWo = Thread(target=searcher.kuWoSearch)
-        threadQQ.start()
-        threadnetE.start()
-        threadkuWo.start()
-        threadQQ.join()
-        threadnetE.join()
-        threadkuWo.join()
-        first = q.get()
-        second = q.get()
-        third = q.get()
-
-        res = {
-            'error': 0,
-            'msg': None,
-            'data': {
-                'target': target,
-                first[0]: first[1:],
-                second[0]: second[1:],
-                third[0]: third[1:]
-            }
-        }
-
+        searcher = MusicSearcher()
+        res = searcher.searchMain(target)
         return Response(data=res)
 
 
@@ -458,7 +432,7 @@ class GetUrl(APIView):
                 'msg': 'Song Not Found'
             }
 
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class Register(APIView):
@@ -493,7 +467,7 @@ class Register(APIView):
                 "user_id": user.id,
                 "user_name": user.username
             }
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class GetLyric(APIView):
@@ -595,7 +569,7 @@ class GetLyric(APIView):
                 'data': None
             }
 
-        return JsonResponse(res)
+        return Response(data=res)
 
 
 class QQAlbumPic(APIView):
@@ -625,10 +599,10 @@ class QQAlbumPic(APIView):
                 'data': None
             }
 
-        return JsonResponse(res)
+        return Response(data=res)
 
 
-class RadioView(APIView):
+class RadioSearchView(APIView):
     """
     电台搜索接口 暂时只支持网易云 且只支持搜索播放 不能加入歌单 \n
 
@@ -636,10 +610,122 @@ class RadioView(APIView):
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
-        keyword = request.query_params.get('keyword')
+        kw = request.query_params.get('kw')
 
+        s = requests.session()
+        s.headers = {
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'zh-CN,zh;q=0.9',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            # 'Cookie': '_xmLog=xm_1564455319501_jyp8ay8dfpas2z; x_xmly_traffic=utm_source%253A%2526utm_medium%253A%2526utm_campaign%253A%2526utm_content%253A%2526utm_term%253A%2526utm_from%253A; device_id=xm_1564455319822_jyp8ayha85acit; Hm_lvt_4a7d8ec50cfd6af753c4f8aee3425070=1564455320; Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070=1564455320',
+            'Host': 'www.ximalaya.com',
+            'Referer': 'https://www.ximalaya.com/yule/15341221/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
+            # 'xm-sign': '2d8dd82ebf9dcfd304f6d9d196c94754(78)1564455349727(5)1564455350531',
+        }
+
+        params = {
+            'core': 'all',
+            'kw': kw,
+            'spellchecker': 'true',
+            'device': 'iPhone',
+        }
+        s.get("https://www.ximalaya.com")
+
+        res = s.get("https://www.ximalaya.com/revision/search",
+                    params=params)
+        res = json.loads(res.text)
+
+        albums = res['data']['result']['album']
+        results = []
+        for album in albums['docs']:
+            r_album = {}
+            try:
+                r_album['cover_path'] = album['cover_path']
+                r_album['title'] = album['title']
+                r_album['url'] = album['url']
+                r_album['id'] = album['id']
+                r_album['is_paid'] = album['is_paid']
+                r_album['tracks'] = album['tracks']
+                r_album['id'] = album['id']
+                r_album['pages'] = math.ceil(album['tracks'] / 30)
+            except:
+                pass
+            results.append(r_album)
 
         res = {
-
+            'error': 0,
+            'msg':"success",
+            'data': results
         }
-        return JsonResponse(res)
+        return Response(res)
+
+
+class RadioDetailView(APIView):
+    """
+    单个电台栏目详细信息获取
+    """
+    permission_classes = []
+
+    def getxmtime(self):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+ xml,application/xml;q = 0.9,image/webp,image/apng,*/*;q=0.8, application/signe-exchange;v = b3',
+            'Host': 'www.ximalaya.com'
+        }
+        url = "https://www.ximalaya.com/revision/time"
+        response = requests.get(url, headers=headers)
+        html = response.text
+        return html
+
+    def exec_js(self):
+        time = self.getxmtime()
+        path = BASE_DIR + "\\api\\radiojs\\xmSign.js"
+        with open(path, encoding='utf-8') as f:
+            js = f.read()
+
+        docjs = execjs.compile(js)
+        res = docjs.call('python', time)
+        return res
+
+    def get(self,request,*args,**kwargs):
+        radio_id = request.query_params.get('id')
+        page = request.query_params.get('page')
+
+        s = requests.session()
+        s.headers = {
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'zh-CN,zh;q=0.9',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            # 'Cookie': '_xmLog=xm_1564455319501_jyp8ay8dfpas2z; x_xmly_traffic=utm_source%253A%2526utm_medium%253A%2526utm_campaign%253A%2526utm_content%253A%2526utm_term%253A%2526utm_from%253A; device_id=xm_1564455319822_jyp8ayha85acit; Hm_lvt_4a7d8ec50cfd6af753c4f8aee3425070=1564455320; Hm_lpvt_4a7d8ec50cfd6af753c4f8aee3425070=1564455320',
+            'Host': 'www.ximalaya.com',
+            'Referer': 'https://www.ximalaya.com/yule/15341221/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
+            # 'xm-sign': '2d8dd82ebf9dcfd304f6d9d196c94754(78)1564455349727(5)1564455350531',
+        }
+        pageurl = "https://www.ximalaya.com/revision/play/album"
+        params = {
+            'albumId': radio_id,
+            'pageNum': page,
+            'sort': 1,
+            'pageSize': 30,
+        }
+
+        xm_sign = self.exec_js()
+        s.headers['xm-sign'] = xm_sign
+        res2 = s.get(pageurl, params=params)
+        res2 = json.loads(res2.text)
+        song_list = res2['data']['tracksAudioPlay']
+
+        res = {
+            'error': 0,
+            'msg':'success',
+            'data':{
+                'programs':song_list
+            }
+        }
+        return Response(data=res)

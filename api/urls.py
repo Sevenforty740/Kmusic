@@ -17,6 +17,7 @@ urlpatterns = [
     re_path(r'^password/$', PasswordView.as_view()),
     re_path(r'^lyric/$',GetLyric.as_view()),
     re_path(r'^qqalbumpic/$', QQAlbumPic.as_view()),
-    re_path(r'^radio/$',RadioView.as_view()),
+    re_path(r'^radios/$',RadioSearchView.as_view()),
+    re_path(r'^radio/$',RadioDetailView.as_view()),
     re_path(r'^docs/', include_docs_urls(title=API_TITLE, authentication_classes=[], permission_classes=[]))
 ]
