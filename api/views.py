@@ -10,8 +10,11 @@ import requests
 import base64
 import execjs
 from KMusic.settings import BASE_DIR
-
+from concurrent.futures import ThreadPoolExecutor
 # Create your views here.
+
+pool = ThreadPoolExecutor()
+
 
 class CsrfView(APIView):
     """
@@ -354,7 +357,7 @@ class SearchView(APIView):
     def get(self, request, *args, **kwargs):
         target = urllib.parse.unquote(request.query_params.get('keyword'))
         searcher = MusicSearcher()
-        res = searcher.searchMain(target)
+        res = searcher.search(target)
         return Response(data=res)
 
 
