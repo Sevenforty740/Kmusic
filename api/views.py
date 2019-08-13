@@ -1,6 +1,6 @@
 import logging
 import urllib
-import re,math
+import re,math,time
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from main.models import *
@@ -542,7 +542,7 @@ class GetLyric(APIView):
             lyric_url1 = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
             params = {
                 '-': 'MusicJsonCallback_lrc',
-                'pcachetime': '1563195700005',
+                'pcachetime': str(int(time.time()*1000)),
                 'songmid': songid,
                 'g_tk': '5381',
                 'loginUin': '0',
