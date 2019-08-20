@@ -3,7 +3,9 @@ from concurrent.futures import ThreadPoolExecutor
 from .netEaseEncode import *
 import urllib.parse
 import time
+import math
 import queue
+
 
 def getQQTime(s):
     s = s
@@ -13,14 +15,27 @@ def getQQTime(s):
 
 
 def getNeTime(ms):
-    s = ms/1000
-    mi = s//60
+    s = ms / 1000
+    mi = s // 60
     se = s % 60
-    return '%02d:%02d'% (mi, se)
+    return '%02d:%02d' % (mi, se)
 
 
 class MusicSearcher():
-    def searchQQ(self,target,q):
+    def __init__(self):
+        self.s = requests.Session()
+
+    def encrypted_params(self, keyword, session):
+        _q = dict(key=keyword, pagingVO=dict(page=1, pageSize=60))
+        _q = json.dumps(_q)
+        url = "https://www.xiami.com/search?key={}".format(keyword)
+        res = session.get(url)
+        cookie = res.cookies.get("xm_sg_tk", "").split("_")[0]
+        origin_str = "%s_xmMain_/api/search/searchSongs_%s" % (cookie, _q)
+        _s = hashlib.md5(origin_str.encode()).hexdigest()
+        return dict(_q=_q, _s=_s)
+
+    def searchQQ(self, target, q):
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
 
         headers = {
@@ -31,37 +46,46 @@ class MusicSearcher():
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN',
             'User-Agent': 'Mozilla/5.0(compatible;MSIE 9.0;Windows NT 6.1;WOW64;Trident/5.0)',
-            'Host' : 'c.y.qq.com',
-            'Referer' : 'c.y.qq.com'
+            'Host': 'c.y.qq.com',
+            'Referer': 'c.y.qq.com'
         }
 
         params = {
-            'format' : 'json',
-            't' : 0,
-            'loginUin' : 0,
-            'inCharset' : 'GB2312',
-            'outCharset' : 'utf-8',
-            'qqmusic_ver' : 1653,
-            'catZhida' : 1,
-            'p' : 1,
-            'n' : 60,
-            'w' : urllib.parse.quote(target),
-            'flag_qc' : 0,
-            'remoteplace' : 'txt.newclient.top',
-            'new_json' : 1,
-            'auto' : 1,
-            'lossless' : 0,
-            'aggr' : 1,
-            'cr' : 1,
-            'sem' : 0,
-            'force_zonghe' : 0,
-            'pcachetime':int(time.time()),
+            'format': 'json',
+            't': 0,
+            'loginUin': 0,
+            'inCharset': 'GB2312',
+            'outCharset': 'utf-8',
+            'qqmusic_ver': 1653,
+            'catZhida': 1,
+            'p': 1,
+            'n': 60,
+            'w': urllib.parse.quote(target),
+            'flag_qc': 0,
+            'remoteplace': 'txt.newclient.top',
+            'new_json': 1,
+            'auto': 1,
+            'lossless': 0,
+            'aggr': 1,
+            'cr': 1,
+            'sem': 0,
+            'force_zonghe': 0,
+            'pcachetime': int(time.time()),
         }
 
-        res = requests.get(url,params=params,headers=headers)
-        r_d = json.loads(res.text)
-        r_l = r_d['data']['song']['list']
-        resultList = ['qq']
+        res = requests.get(url, params=params, headers=headers)
+        search_res_dict = json.loads(res.text)
+        result_dict = {
+            "source": 'qq',
+            "paginate": {
+                "page": int(search_res_dict['data']['song']['curpage']),
+                "pagesize": int(params['n']),
+                "pages": int(math.ceil(int(search_res_dict['data']['song']['totalnum']) / int(params['n']))),
+                "count": int(search_res_dict['data']['song']['total'])
+            },
+            "songs": []
+        }
+        r_l = search_res_dict['data']['song']['list']
         for song in r_l:
             songDic = {}
             songDic['source'] = 'qq'
@@ -71,13 +95,15 @@ class MusicSearcher():
             songDic['artist_id'] = song['singer'][0]['id']
             songDic['artist'] = song['singer'][0]['name']
             songDic['album_id'] = song['album']['id']
-            songDic['album_mid'] = song['album']['mid']
+            mid = song['album']['mid']
+            songDic['album_pic'] = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000{}.jpg'.format(
+                mid)
             songDic['album'] = song['album']['name']
-            resultList.append(songDic)
+            result_dict['songs'].append(songDic)
 
-        q.put(resultList)
+        q.put_nowait(result_dict)
 
-    def searchNetease(self,target,q):
+    def searchNetease(self, target, q):
         url = 'https://music.163.com/weapi/cloudsearch/get/web'
 
         headers = {
@@ -94,15 +120,29 @@ class MusicSearcher():
 
         data = {
             's': target,
-            'offset': '0',
-            'limit': '60',
-            'type': '1'
+            'offset': 0,
+            'limit': 60,
+            'type': 1
         }
+        if data['offset'] < 60:
+            page = 1
+        else:
+            page = int(data['offset'] / 60)
+
         data = encrypted_request(data)
-        res = requests.post(url,headers=headers,data=data)
-        r_d = json.loads(res.text)
-        r_l = r_d['result']['songs']
-        resultList = ['netease']
+        res = requests.post(url, headers=headers, data=data)
+        search_res_dict = json.loads(res.text)
+        result_dict = {
+            "source": 'netease',
+            "paginate": {
+                "page": page,
+                "pagesize": data['limit'],
+                "pages": int(math.ceil(int(search_res_dict['result']['songCount']) / data['limit'])),
+                "count": search_res_dict['result']['songCount']
+            },
+            "songs": []
+        }
+        r_l = search_res_dict['result']['songs']
         for song in r_l:
             songDic = {}
             songDic['source'] = 'netease'
@@ -114,12 +154,11 @@ class MusicSearcher():
             songDic['album_id'] = song['al']['id']
             songDic['album'] = song['al']['name']
             songDic['album_pic'] = song['al']['picUrl']
-            resultList.append(songDic)
+            result_dict['songs'].append(songDic)
 
-        q.put_nowait(resultList)
+        q.put_nowait(search_res_dict)
 
-
-    def searchKuwo(self,target,q):
+    def searchKuwo(self, target, q):
         url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
 
         headers = {
@@ -136,12 +175,21 @@ class MusicSearcher():
             'key': target,
             'pn': '1',
             'rn': '60',
-            'reqId': 'b6168da1-a385-11e9-b78e-a5d90de9d862'
         }
 
-        res = requests.get(url,headers=headers,params=params)
+        res = requests.get(url, headers=headers, params=params)
         search_res_dict = json.loads(res.text)
-        resultList = ['kuwo']
+        result_dict = {
+            "source": 'kuwo',
+            "paginate": {
+                "page": int(params['pn']),
+                "pagesize": int(params['rn']),
+                "pages": int(math.ceil(int(search_res_dict['data']['total']) / int(params['rn']))),
+                "count": int(search_res_dict['data']['total'])
+            },
+            "songs": []
+        }
+
         for song in search_res_dict['data']['list']:
             d = {}
             d['source'] = 'kuwo'
@@ -151,35 +199,71 @@ class MusicSearcher():
             d['artist_id'] = song['artistid']
             d['album'] = song['album']
             d['album_id'] = song['albumid']
+            d['needPayFlag'] = 1 if song['isListenFee'] else 0
             try:
                 d['album_pic'] = song['albumpic']
-            except:
+            except BaseException:
                 pass
             d['duration'] = song['songTimeMinutes']
-            resultList.append(d)
-        q.put_nowait(resultList)
+            result_dict['songs'].append(d)
+        q.put_nowait(result_dict)
 
+    def searchXiami(self, target, q):
+        self.s.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+            'referer': 'http://m.xiami.com/'
+        }
+        params = self.encrypted_params(target, self.s)
+        res = self.s.get(
+            "https://www.xiami.com/api/search/searchSongs",
+            params=params)
+        search_res_dict = json.loads(res.text)
+        result_dict = dict()
+        result_dict['source'] = 'xiami'
+        result_dict['songs'] = []
+        result_dict["paginate"] = search_res_dict["result"]["data"]["pagingVO"]
+        for song in search_res_dict["result"]["data"]["songs"]:
+            r_dict = {}
+            r_dict['source'] = 'xiami'
+            r_dict['name'] = song['songName']
+            r_dict['song_id'] = song['songId']
+            r_dict['duration'] = getNeTime(song['length'])
+            r_dict['artist_id'] = song['artistId']
+            r_dict['artist'] = song['artistName']
+            r_dict['artist_pic'] = song['artistLogo']
+            r_dict['album_id'] = song['albumId']
+            r_dict['album'] = song['albumName']
+            r_dict['album_pic'] = song['albumLogo']
+            try:
+                r_dict['lyric'] = song['lyricInfo']['lyricFile']
+            except BaseException:
+                r_dict['lyric'] = None
+            r_dict['needPayFlag'] = song['needPayFlag']
+            result_dict['songs'].append(r_dict)
 
-    def search(self,target):
+        q.put_nowait(result_dict)
+
+    def search(self, target):
         q = queue.Queue()
         pool = ThreadPoolExecutor()
-        pool.submit(self.searchQQ,target,q)
-        pool.submit(self.searchNetease,target,q)
-        pool.submit(self.searchKuwo,target,q)
+        pool.submit(self.searchQQ, target, q)
+        pool.submit(self.searchNetease, target, q)
+        pool.submit(self.searchKuwo, target, q)
+        pool.submit(self.searchXiami, target, q)
         pool.shutdown(wait=True)
         first = q.get()
         second = q.get()
         third = q.get()
+        fourth = q.get()
         res = {
             'error': 0,
-            'msg': None,
+            'msg': 'success',
             'data': {
                 'target': target,
-                first[0]: first[1:],
-                second[0]: second[1:],
-                third[0]: third[1:]
+                first['source']: first,
+                second['source']: second,
+                third['source']: third,
+                fourth['source']: fourth
             }
         }
-
         return res
-

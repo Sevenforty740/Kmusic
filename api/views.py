@@ -1,6 +1,6 @@
 import logging
 import urllib
-import re,math,time
+import re
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from main.models import *
@@ -10,12 +10,8 @@ import requests
 import base64
 import execjs
 from KMusic.settings import BASE_DIR
-from concurrent.futures import ThreadPoolExecutor
+
 # Create your views here.
-
-pool = ThreadPoolExecutor()
-
-
 class CsrfView(APIView):
     """
     获取Csrf_token \n
@@ -361,83 +357,6 @@ class SearchView(APIView):
         return Response(data=res)
 
 
-class GetUrl(APIView):
-    permission_classes = []
-
-    def post(self, request, *args, **kwargs):
-        """
-        根据搜索接口获得的歌曲id 获取歌曲播放及下载url \n
-        :param song_id: 歌曲id \n
-        :param source: 歌曲来源\n
-        :return: 歌曲url
-        """
-        songid = request.data.get('song_id')
-        source = request.data.get('source')
-        if source == 'netease':
-            url = "http://music.163.com/song/media/outer/url?id={}.mp3".format(
-                songid)
-            res = {
-                'code': 200,
-                'msg': 'success',
-                'url': url
-            }
-
-        elif source == 'qq':
-            vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
-            data = {
-                'g_tk': '195219765',
-                'jsonpCallback': 'MusicJsonCallback004680169373158849',
-                'loginUin': '125045209',
-                'hostUin': '0',
-                'format': 'json',
-                'inCharset': 'utf8',
-                'outCharset': 'utf-8',
-                'notice': '0',
-                'platform': 'yqq',
-                'needNewCode': '0',
-                'cid': '205361747',
-                'callback': 'MusicJsonCallback004680169373158849',
-                'uin': '125045209',
-                'songmid': songid,
-                'filename': 'C400{}.m4a'.format(songid),
-                'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
-            }
-            res = requests.get(vkey_url, params=data, verify=False)
-            res = json.loads(res.text[36:-1])
-            vkey = res['data']['items'][0]['vkey']
-            url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(
-                songid, vkey)
-            res = {
-                'code': 200,
-                'msg': 'success',
-                'url': url
-            }
-
-        elif source == 'kuwo':
-
-            url_params = {
-                'format': 'mp3',
-                'rid': songid,
-                'response': 'url',
-                'type': 'convert_url3',
-                'br': '320kmp3',
-                'from': 'web',
-                't': str(int(time.time() * 1000)),
-                'reqId': '3cb750f1-a387-11e9-bf69-fbb42f0bf2bb'
-            }
-
-            res = requests.get('http://www.kuwo.cn/url', params=url_params)
-            res = json.loads(res.text)
-
-        else:
-            res = {
-                'code': 404,
-                'msg': 'Song Not Found'
-            }
-
-        return Response(data=res)
-
-
 class Register(APIView):
     """
     注册用户 \n
@@ -470,138 +389,6 @@ class Register(APIView):
                 "user_id": user.id,
                 "user_name": user.username
             }
-        return Response(data=res)
-
-
-class GetLyric(APIView):
-    """
-    获取歌词接口 \n
-    :param song_id: 歌曲id \n
-    :param source: 歌曲来源 \n
-    :return: 歌词字符串
-    """
-
-    permission_classes = []
-
-    def get(self, request, *args, **kwargs):
-        songid = request.query_params.get('song_id')
-        source = request.query_params.get('source')
-
-        if source == 'kuwo':
-            lyric_url = 'http://m.kuwo.cn/newh5/singles/songinfoandlrc?musicId={}'.format(
-                songid)
-            res = requests.get(lyric_url)
-            res.encoding = "utf-8"
-            res = json.loads(res.text)
-            lyric_kuwo = res['data']['lrclist']
-
-            def timeformat(time):
-                time = float(time)
-                minute = time // 60
-                second = round(time - minute * 60, 3)
-                return "[%02d:%06.3f]" % (minute, second)
-
-            lyric_format = "\n".join(
-                [timeformat(line['time']) + line['lineLyric'] for line in lyric_kuwo])
-
-            res = {
-                'error': 0,
-                'msg': 'success',
-                'data': {
-                    'lyric': lyric_format
-                }
-            }
-
-        elif source == 'netease':
-            lyric_url = 'http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1'.format(
-                songid)
-            res = requests.get(lyric_url)
-            res.encoding = 'utf-8'
-            res = json.loads(res.text)
-            res = {
-                'error': 0,
-                'msg': 'success',
-                'data': {
-                    'lyric': res['lrc']['lyric']
-                }
-            }
-
-        elif source == 'qq':
-            headers = {
-                'Connection': 'Keep-Alive',
-                'Pragma': 'no-cache',
-                'Cache-Control': 'no-cache',
-                'Accept-Encoding': 'gzip, deflate',
-                'Accept-Language': 'zh-CN',
-                'Accept': '*/*',
-                'User-Agent': 'Mozilla/5.0(compatible;MSIE 9.0;Windows NT 6.1;WOW64;Trident/5.0)',
-                'Host': 'c.y.qq.com',
-                'Referer': 'c.y.qq.com',
-            }
-
-            lyric_url1 = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
-            params = {
-                '-': 'MusicJsonCallback_lrc',
-                'pcachetime': str(int(time.time()*1000)),
-                'songmid': songid,
-                'g_tk': '5381',
-                'loginUin': '0',
-                'hostUin': '0',
-                'format': 'json',
-                'inCharset': 'utf8',
-                'outCharset': 'utf - 8',
-                'notice': '0',
-                'platform': 'yqq.json',
-                'needNewCode': '0',
-            }
-            res1 = requests.get(lyric_url1, params=params, headers=headers)
-            res1 = json.loads(res1.text)
-            lyric = base64.b64decode(res1['lyric']).decode()
-            res = {
-                'error': 0,
-                'msg': 'success',
-                'data': {
-                    'lyric': lyric
-                }
-            }
-
-        else:
-            res = {
-                'error': 1,
-                'msg': '参数错误',
-                'data': None
-            }
-
-        return Response(data=res)
-
-
-class QQAlbumPic(APIView):
-    """
-    获取qq音乐专辑封面 \n
-    :param album_mid: 只能发送qq音乐专辑mid 也就是搜索接口qq平台返回的album_mid \n
-    :return: qq音乐专辑封面url
-    """
-    permission_classes = []
-
-    def get(self, request, *args, **kwargs):
-        try:
-            album_mid = request.query_params.get('album_mid')
-            album_pic_url = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000{}.jpg'.format(
-                album_mid)
-            res = {
-                'error': 0,
-                'msg': 'success',
-                'data': {
-                    'album_pic': album_pic_url
-                }
-            }
-        except BaseException:
-            res = {
-                'error': 1,
-                'msg': '参数错误',
-                'data': None
-            }
-
         return Response(data=res)
 
 
@@ -732,3 +519,155 @@ class RadioDetailView(APIView):
             }
         }
         return Response(data=res)
+
+
+class SongDetailView(APIView):
+    permission_classes = []
+    def post(self,request,*args,**kwargs):
+        data = request.data.dict()
+        source = data['source']
+        songid = data['song_id']
+        if source == 'netease':
+            # 歌词
+            lyric_url = 'http://music.163.com/api/song/lyric?os=osx&id={}&lv=-1&kv=-1&tv=-1'.format(
+                songid)
+            res = requests.get(lyric_url)
+            res.encoding = 'utf-8'
+            res = json.loads(res.text)
+            lyric = res['lrc']['lyric']
+            data['lyric'] = lyric
+            # 播放url
+            url = "http://music.163.com/song/media/outer/url?id={}.mp3".format(
+                songid)
+            data['url'] = url
+
+        elif source == 'kuwo':
+            # 歌词
+            lyric_url = 'http://m.kuwo.cn/newh5/singles/songinfoandlrc?musicId={}'.format(
+                songid)
+            res = requests.get(lyric_url)
+            res.encoding = "utf-8"
+            res = json.loads(res.text)
+            lyric = res['data']['lrclist']
+            data['lyric'] = lyric
+
+            def timeformat(time):
+                time = float(time)
+                minute = time // 60
+                second = round(time - minute * 60, 3)
+                return "[%02d:%06.3f]" % (minute, second)
+
+            lyric_format = "\n".join(
+                [timeformat(line['time']) + line['lineLyric'] for line in lyric])
+            data['lyric'] = lyric_format
+            # url
+            url_params = {
+                'format': 'mp3',
+                'rid': songid,
+                'response': 'url',
+                'type': 'convert_url3',
+                'br': '320kmp3',
+                'from': 'web',
+                't': str(int(time.time() * 1000)),
+            }
+            res = requests.get('http://www.kuwo.cn/url', params=url_params)
+            res = json.loads(res.text)
+            # {"code": 200, "msg": "success", "url": "https://nc01-sycdn.kuwo.cn/af8dcf1a5850a74edaf02433904bebc2/5d5a3e1e/resource/n3/36/12/1210429732.mp3"}
+            data['url'] = res['url']
+
+        elif source == 'qq':
+            # 歌词
+            headers = {
+                'Connection': 'Keep-Alive',
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'zh-CN',
+                'Accept': '*/*',
+                'User-Agent': 'Mozilla/5.0(compatible;MSIE 9.0;Windows NT 6.1;WOW64;Trident/5.0)',
+                'Host': 'c.y.qq.com',
+                'Referer': 'c.y.qq.com',
+            }
+
+            lyric_url1 = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+            params = {
+                '-': 'MusicJsonCallback_lrc',
+                'pcachetime': str(int(time.time() * 1000)),
+                'songmid': songid,
+                'g_tk': '5381',
+                'loginUin': '0',
+                'hostUin': '0',
+                'format': 'json',
+                'inCharset': 'utf8',
+                'outCharset': 'utf - 8',
+                'notice': '0',
+                'platform': 'yqq.json',
+                'needNewCode': '0',
+            }
+            res1 = requests.get(lyric_url1, params=params, headers=headers)
+            res1 = json.loads(res1.text)
+            lyric = base64.b64decode(res1['lyric']).decode()
+            data['lyric'] = lyric
+
+            # url
+            vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
+            data_qq = {
+                'g_tk': '195219765',
+                'jsonpCallback': 'MusicJsonCallback004680169373158849',
+                'loginUin': '125045209',
+                'hostUin': '0',
+                'format': 'json',
+                'inCharset': 'utf8',
+                'outCharset': 'utf-8',
+                'notice': '0',
+                'platform': 'yqq',
+                'needNewCode': '0',
+                'cid': '205361747',
+                'callback': 'MusicJsonCallback004680169373158849',
+                'uin': '125045209',
+                'songmid': songid,
+                'filename': 'C400{}.m4a'.format(songid),
+                'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
+            }
+            res = requests.get(vkey_url, params=data_qq, verify=False)
+            res = json.loads(res.text[36:-1])
+            vkey = res['data']['items'][0]['vkey']
+            url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(
+                songid, vkey)
+            data['url'] = url
+
+        elif source == 'xiami':
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+                'referer': 'http://m.xiami.com/'
+            }
+            # 歌词
+            try:
+                lyric_file = data['lyric']
+                lyric_res = requests.get(lyric_file,headers=headers)
+                lyric_res.encoding = "utf-8"
+                lyric_before = lyric_res.text
+                lyric = re.sub(r'<\d+?>','',lyric_before,flags=re.S)
+            except KeyError:
+                lyric = ''
+            data['lyric'] = lyric
+
+            # url
+            url = 'http://api.xiami.com/web'
+            params = {
+                "v": "2.0",
+                "app_key": "1",
+                "r": "song/detail",
+                "id": songid,
+            }
+            res = requests.get(url, params=params, headers=headers)
+            res.encoding = "utf-8"
+            res = json.loads(res.text)
+            url = res['data']['song'].get('listen_file','')
+            data['url'] = url
+
+        result = {
+            'error':0,
+            'data':data
+        }
+        return Response(data=result)
