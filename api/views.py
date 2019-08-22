@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import logging
 import urllib
 import re
@@ -10,6 +11,7 @@ import requests
 import base64
 import execjs
 from KMusic.settings import BASE_DIR
+from api.search4api import MusicSearcher
 
 # Create your views here.
 class CsrfView(APIView):
@@ -351,9 +353,11 @@ class SearchView(APIView):
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
-        target = urllib.parse.unquote(request.query_params.get('keyword'))
+        target = request.query_params.get('keyword')
+        target = urllib.parse.unquote(target)
         searcher = MusicSearcher()
         res = searcher.search(target)
+        del searcher
         return Response(data=res)
 
 

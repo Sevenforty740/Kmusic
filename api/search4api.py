@@ -1,7 +1,7 @@
+# -*- coding: UTF-8 -*-
 import requests
-from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
 from .netEaseEncode import *
-import urllib.parse
 import time
 import math
 import queue
@@ -13,23 +13,18 @@ def getQQTime(s):
     se = s % 60
     return '%02d:%02d' % (mi, se)
 
-
 def getNeTime(ms):
     s = ms / 1000
     mi = s // 60
     se = s % 60
     return '%02d:%02d' % (mi, se)
 
-
 class MusicSearcher():
-    def __init__(self):
-        self.s = requests.Session()
-
-    def encrypted_params(self, keyword, session):
+    def encrypted_params(self, keyword):
         _q = dict(key=keyword, pagingVO=dict(page=1, pageSize=60))
         _q = json.dumps(_q)
         url = "https://www.xiami.com/search?key={}".format(keyword)
-        res = session.get(url)
+        res = self.s.get(url)
         cookie = res.cookies.get("xm_sg_tk", "").split("_")[0]
         origin_str = "%s_xmMain_/api/search/searchSongs_%s" % (cookie, _q)
         _s = hashlib.md5(origin_str.encode()).hexdigest()
@@ -60,7 +55,7 @@ class MusicSearcher():
             'catZhida': 1,
             'p': 1,
             'n': 60,
-            'w': urllib.parse.quote(target),
+            'w': target,
             'flag_qc': 0,
             'remoteplace': 'txt.newclient.top',
             'new_json': 1,
@@ -81,7 +76,7 @@ class MusicSearcher():
                 "page": int(search_res_dict['data']['song']['curpage']),
                 "pagesize": int(params['n']),
                 "pages": int(math.ceil(int(search_res_dict['data']['song']['totalnum']) / int(params['n']))),
-                "count": int(search_res_dict['data']['song']['total'])
+                "count": int(search_res_dict['data']['song']['totalnum'])
             },
             "songs": []
         }
@@ -118,26 +113,26 @@ class MusicSearcher():
             'Referer': 'http://music.163.com/'
         }
 
-        data = {
+        data_ne_b = {
             's': target,
             'offset': 0,
             'limit': 60,
             'type': 1
         }
-        if data['offset'] < 60:
+        if data_ne_b['offset'] < 60:
             page = 1
         else:
-            page = int(data['offset'] / 60)
+            page = int(data_ne_b['offset'] / 60)
 
-        data = encrypted_request(data)
-        res = requests.post(url, headers=headers, data=data)
+        data_ne = encrypted_request(data_ne_b)
+        res = requests.post(url, headers=headers, data=data_ne)
         search_res_dict = json.loads(res.text)
         result_dict = {
             "source": 'netease',
             "paginate": {
                 "page": page,
-                "pagesize": data['limit'],
-                "pages": int(math.ceil(int(search_res_dict['result']['songCount']) / data['limit'])),
+                "pagesize": data_ne_b['limit'],
+                "pages": int(math.ceil(int(search_res_dict['result']['songCount']) / data_ne_b['limit'])),
                 "count": search_res_dict['result']['songCount']
             },
             "songs": []
@@ -156,7 +151,7 @@ class MusicSearcher():
             songDic['album_pic'] = song['al']['picUrl']
             result_dict['songs'].append(songDic)
 
-        q.put_nowait(search_res_dict)
+        q.put_nowait(result_dict)
 
     def searchKuwo(self, target, q):
         url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
@@ -209,48 +204,71 @@ class MusicSearcher():
         q.put_nowait(result_dict)
 
     def searchXiami(self, target, q):
-        self.s.headers = {
+        headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
             'referer': 'http://m.xiami.com/'
         }
-        params = self.encrypted_params(target, self.s)
-        res = self.s.get(
-            "https://www.xiami.com/api/search/searchSongs",
-            params=params)
+        search_url = 'http://api.xiami.com/web'
+        params = {
+            "key": target,
+            "v": "2.0",
+            "app_key": "1",
+            "r": "search/songs",
+            "page": 1,
+            "limit": 50,
+        }
+        res = requests.get(search_url, params=params, headers=headers)
+        res.encoding = "utf-8"
         search_res_dict = json.loads(res.text)
-        result_dict = dict()
-        result_dict['source'] = 'xiami'
-        result_dict['songs'] = []
-        result_dict["paginate"] = search_res_dict["result"]["data"]["pagingVO"]
-        for song in search_res_dict["result"]["data"]["songs"]:
+
+        result_dict = {
+            "source": 'xiami',
+            "paginate": {
+                "page": int(params['page']),
+                "pagesize": int(params['limit']),
+                "pages": int(math.ceil(int(search_res_dict['data']['total']) / int(params['limit']))),
+                "count": int(search_res_dict['data']['total'])
+            },
+            "songs": []
+        }
+        for song in search_res_dict["data"]["songs"]:
             r_dict = {}
             r_dict['source'] = 'xiami'
-            r_dict['name'] = song['songName']
-            r_dict['song_id'] = song['songId']
-            r_dict['duration'] = getNeTime(song['length'])
-            r_dict['artist_id'] = song['artistId']
-            r_dict['artist'] = song['artistName']
-            r_dict['artist_pic'] = song['artistLogo']
-            r_dict['album_id'] = song['albumId']
-            r_dict['album'] = song['albumName']
-            r_dict['album_pic'] = song['albumLogo']
+            r_dict['name'] = song['song_name']
+            r_dict['song_id'] = song['song_id']
             try:
-                r_dict['lyric'] = song['lyricInfo']['lyricFile']
+                r_dict['duration'] = getNeTime(song['length'])
+            except:
+                r_dict['duration'] = None
+            r_dict['artist_id'] = song['artist_id']
+            r_dict['artist'] = song['artist_name']
+            r_dict['artist_pic'] = song['artist_logo']
+            r_dict['album_id'] = song['album_id ']
+            r_dict['album'] = song['album_name']
+            r_dict['album_pic'] = song['album_logo']
+            try:
+                r_dict['lyric'] = song['lyric']
             except BaseException:
                 r_dict['lyric'] = None
-            r_dict['needPayFlag'] = song['needPayFlag']
+            r_dict['needPayFlag'] = song['need_pay_flag']
             result_dict['songs'].append(r_dict)
 
         q.put_nowait(result_dict)
 
     def search(self, target):
         q = queue.Queue()
-        pool = ThreadPoolExecutor()
-        pool.submit(self.searchQQ, target, q)
-        pool.submit(self.searchNetease, target, q)
-        pool.submit(self.searchKuwo, target, q)
-        pool.submit(self.searchXiami, target, q)
-        pool.shutdown(wait=True)
+        t1 = Thread(target=self.searchQQ,args=(target,q))
+        t2 = Thread(target=self.searchNetease,args=(target,q))
+        t3 = Thread(target=self.searchKuwo,args=(target,q))
+        t4 = Thread(target=self.searchXiami,args=(target,q))
+        t1.start()
+        t2.start()
+        t3.start()
+        t4.start()
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
         first = q.get()
         second = q.get()
         third = q.get()
