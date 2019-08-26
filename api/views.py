@@ -14,6 +14,8 @@ from KMusic.settings import BASE_DIR
 from api.search4api import MusicSearcher
 
 # Create your views here.
+
+
 class CsrfView(APIView):
     """
     获取Csrf_token \n
@@ -39,6 +41,7 @@ class PasswordView(APIView):
     :param new_password: 新密码string \n
     :return: 成功或失败
     """
+
     def put(self, request, *args, **kwargs):
         res = {
             'error': 0,
@@ -445,13 +448,13 @@ class RadioSearchView(APIView):
                 r_album['tracks'] = album['tracks']
                 r_album['id'] = album['id']
                 r_album['pages'] = math.ceil(album['tracks'] / 30)
-            except:
+            except BaseException:
                 pass
             results.append(r_album)
 
         res = {
             'error': 0,
-            'msg':"success",
+            'msg': "success",
             'data': results
         }
         return Response(res)
@@ -484,7 +487,7 @@ class RadioDetailView(APIView):
         res = docjs.call('python', time)
         return res
 
-    def get(self,request,*args,**kwargs):
+    def get(self, request, *args, **kwargs):
         radio_id = request.query_params.get('id')
         page = request.query_params.get('page')
 
@@ -517,9 +520,9 @@ class RadioDetailView(APIView):
 
         res = {
             'error': 0,
-            'msg':'success',
-            'data':{
-                'programs':song_list
+            'msg': 'success',
+            'data': {
+                'programs': song_list
             }
         }
         return Response(data=res)
@@ -527,7 +530,8 @@ class RadioDetailView(APIView):
 
 class SongDetailView(APIView):
     permission_classes = []
-    def post(self,request,*args,**kwargs):
+
+    def post(self, request, *args, **kwargs):
         data = request.data.dict()
         source = data['source']
         songid = data['song_id']
@@ -648,10 +652,10 @@ class SongDetailView(APIView):
             # 歌词
             try:
                 lyric_file = data['lyric']
-                lyric_res = requests.get(lyric_file,headers=headers)
+                lyric_res = requests.get(lyric_file, headers=headers)
                 lyric_res.encoding = "utf-8"
                 lyric_before = lyric_res.text
-                lyric = re.sub(r'<\d+?>','',lyric_before,flags=re.S)
+                lyric = re.sub(r'<\d+?>', '', lyric_before, flags=re.S)
             except KeyError:
                 lyric = ''
             data['lyric'] = lyric
@@ -667,11 +671,245 @@ class SongDetailView(APIView):
             res = requests.get(url, params=params, headers=headers)
             res.encoding = "utf-8"
             res = json.loads(res.text)
-            url = res['data']['song'].get('listen_file','')
+            url = res['data']['song'].get('listen_file', '')
             data['url'] = url
 
         result = {
-            'error':0,
-            'data':data
+            'error': 0,
+            'data': data
         }
         return Response(data=result)
+
+
+class PageFlip(APIView):
+    permission_classes = []
+
+    def get(self,request,*args,**kwargs):
+        source = request.query_params.get('source')
+        kw = request.query_params.get('keyword')
+        t_page = int(request.query_params.get('page'))
+
+        if source == 'netease':
+            url = 'https://music.163.com/weapi/cloudsearch/get/web'
+
+            headers = {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Connection': 'Keep-Alive',
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache',
+                'Accept-Encoding': 'gzip,deflate,sdch',
+                'Accept-Language': 'zh-CN,zh;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36',
+                'Host': 'music.163.com',
+                'Referer': 'http://music.163.com/'
+            }
+
+            offset = 0 if t_page == 1 else (t_page - 1) * 60
+
+            data_ne_b = {
+                's': kw,
+                'offset': offset,
+                'limit': 60,
+                'type': 1
+            }
+
+            data_ne = encrypted_request(data_ne_b)
+            res = requests.post(url, headers=headers, data=data_ne)
+            search_res_dict = json.loads(res.text)
+            result_dict = {
+                "source": 'netease',
+                "paginate": {
+                    "page": t_page,
+                    "pagesize": data_ne_b['limit'],
+                    "pages": int(math.ceil(int(search_res_dict['result']['songCount']) / data_ne_b['limit'])),
+                    "count": search_res_dict['result']['songCount']
+                },
+                "songs": []
+            }
+            r_l = search_res_dict['result']['songs']
+            for song in r_l:
+                songDic = {}
+                songDic['source'] = 'netease'
+                songDic['name'] = song['name']
+                songDic['song_id'] = song['id']
+                songDic['duration'] = getNeTime(song['dt'])
+                songDic['artist_id'] = song['ar'][0]['id']
+                songDic['artist'] = song['ar'][0]['name']
+                songDic['album_id'] = song['al']['id']
+                songDic['album'] = song['al']['name']
+                songDic['album_pic'] = song['al']['picUrl']
+                result_dict['songs'].append(songDic)
+
+        elif source == 'qq':
+            url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
+            headers = {
+                'Accept': '*/*',
+                'Connection': 'Keep-Alive',
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'zh-CN',
+                'User-Agent': 'Mozilla/5.0(compatible;MSIE 9.0;Windows NT 6.1;WOW64;Trident/5.0)',
+                'Host': 'c.y.qq.com',
+                'Referer': 'c.y.qq.com'
+            }
+
+            params = {
+                'format': 'json',
+                't': 0,
+                'loginUin': 0,
+                'inCharset': 'GB2312',
+                'outCharset': 'utf-8',
+                'qqmusic_ver': 1653,
+                'catZhida': 1,
+                'p': t_page,
+                'n': 60,
+                'w': kw,
+                'flag_qc': 0,
+                'remoteplace': 'txt.newclient.top',
+                'new_json': 1,
+                'auto': 1,
+                'lossless': 0,
+                'aggr': 1,
+                'cr': 1,
+                'sem': 0,
+                'force_zonghe': 0,
+                'pcachetime': int(time.time()),
+            }
+
+            res = requests.get(url, params=params, headers=headers)
+            search_res_dict = json.loads(res.text)
+            result_dict = {
+                "source": 'qq',
+                "paginate": {
+                    "page": int(search_res_dict['data']['song']['curpage']),
+                    "pagesize": int(params['n']),
+                    "pages": int(math.ceil(int(search_res_dict['data']['song']['totalnum']) / int(params['n']))),
+                    "count": int(search_res_dict['data']['song']['totalnum'])
+                },
+                "songs": []
+            }
+            r_l = search_res_dict['data']['song']['list']
+            for song in r_l:
+                songDic = {}
+                songDic['source'] = 'qq'
+                songDic['name'] = song['name']
+                songDic['song_id'] = song['mid']
+                songDic['duration'] = getQQTime(song['interval'])
+                songDic['artist_id'] = song['singer'][0]['id']
+                songDic['artist'] = song['singer'][0]['name']
+                songDic['album_id'] = song['album']['id']
+                mid = song['album']['mid']
+                songDic['album_pic'] = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000{}.jpg'.format(
+                    mid)
+                songDic['album'] = song['album']['name']
+                result_dict['songs'].append(songDic)
+
+        elif source == 'kuwo':
+            url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
+
+            headers = {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Connection': 'Keep-Alive',
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache',
+                'Accept-Encoding': 'gzip,deflate,sdch',
+                'Accept-Language': 'zh-CN,zh;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36',
+            }
+
+            params = {
+                'key': kw,
+                'pn': str(t_page),
+                'rn': '60',
+            }
+
+            res = requests.get(url, headers=headers, params=params)
+            search_res_dict = json.loads(res.text)
+            result_dict = {
+                "source": 'kuwo',
+                "paginate": {
+                    "page": t_page,
+                    "pagesize": int(params['rn']),
+                    "pages": int(math.ceil(int(search_res_dict['data']['total']) / int(params['rn']))),
+                    "count": int(search_res_dict['data']['total'])
+                },
+                "songs": []
+            }
+
+            for song in search_res_dict['data']['list']:
+                d = {}
+                d['source'] = 'kuwo'
+                d['name'] = song['name']
+                d['song_id'] = song['rid']
+                d['artist'] = song['artist']
+                d['artist_id'] = song['artistid']
+                d['album'] = song['album']
+                d['album_id'] = song['albumid']
+                d['needPayFlag'] = 1 if song['isListenFee'] else 0
+                try:
+                    d['album_pic'] = song['albumpic']
+                except BaseException:
+                    pass
+                d['duration'] = song['songTimeMinutes']
+                result_dict['songs'].append(d)
+
+        elif source == 'xiami':
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+                'referer': 'http://m.xiami.com/'
+            }
+            search_url = 'http://api.xiami.com/web'
+            params = {
+                "key": kw,
+                "v": "2.0",
+                "app_key": "1",
+                "r": "search/songs",
+                "page": t_page,
+                "limit": 50,
+            }
+            res = requests.get(search_url, params=params, headers=headers)
+            res.encoding = "utf-8"
+            search_res_dict = json.loads(res.text)
+
+            result_dict = {
+                "source": 'xiami',
+                "paginate": {
+                    "page": t_page,
+                    "pagesize": int(params['limit']),
+                    "pages": int(math.ceil(int(search_res_dict['data']['total']) / int(params['limit']))),
+                    "count": int(search_res_dict['data']['total'])
+                },
+                "songs": []
+            }
+            for song in search_res_dict["data"]["songs"]:
+                r_dict = {}
+                r_dict['source'] = 'xiami'
+                r_dict['name'] = song['song_name']
+                r_dict['song_id'] = song['song_id']
+                try:
+                    r_dict['duration'] = getNeTime(song['length'])
+                except:
+                    r_dict['duration'] = None
+                r_dict['artist_id'] = song['artist_id']
+                r_dict['artist'] = song['artist_name']
+                r_dict['artist_pic'] = song['artist_logo']
+                r_dict['album_id'] = song['album_id']
+                r_dict['album'] = song['album_name']
+                r_dict['album_pic'] = song['album_logo']
+                try:
+                    r_dict['lyric'] = song['lyric']
+                except BaseException:
+                    r_dict['lyric'] = None
+                r_dict['needPayFlag'] = song['need_pay_flag']
+                result_dict['songs'].append(r_dict)
+
+        else:
+            result_dict = {
+                "error": 1,
+                "msg": "参数有误",
+                "data": None
+            }
+        return Response(data=result_dict)
+
+

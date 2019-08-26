@@ -243,7 +243,7 @@ class MusicSearcher():
             r_dict['artist_id'] = song['artist_id']
             r_dict['artist'] = song['artist_name']
             r_dict['artist_pic'] = song['artist_logo']
-            r_dict['album_id'] = song['album_id ']
+            r_dict['album_id'] = song['album_id']
             r_dict['album'] = song['album_name']
             r_dict['album_pic'] = song['album_logo']
             try:
