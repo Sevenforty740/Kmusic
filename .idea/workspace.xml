@@ -18,61 +18,95 @@
     <favorites_list name="Kmusic" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/api/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="109">
-              <caret line="688" column="46" selection-start-line="688" selection-start-column="46" selection-end-line="688" selection-end-column="46" />
-              <folding>
-                <element signature="e#24#38#0" expanded="true" />
-                <element signature="e#429#754#0" />
-                <element signature="e#790#1629#0" />
-                <element signature="e#1666#2508#0" />
-                <element signature="e#2544#7226#0" />
-                <element signature="e#7258#10179#0" />
-                <element signature="e#8975#10179#0" />
-                <element signature="e#10634#11576#0" />
-                <element signature="e#11615#13905#0" />
-                <element signature="e#13944#16576#0" />
-                <element signature="e#16614#22425#0" />
-                <element signature="e#22722#24853#0" />
-                <element signature="e#24920#27989#0" />
-                <element signature="e#27530#29812#0" />
-                <element signature="e#29531#31979#0" />
-                <element signature="e#31610#32012#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/api/utils.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/api/urls.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="20" column="1" lean-forward="true" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
-              <folding>
-                <element signature="e#0#36#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/KMusic/settings.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="456">
-              <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="horizontal" split-proportion="0.5">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/api/views.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="4330">
+                  <caret line="915" lean-forward="true" selection-start-line="915" selection-end-line="915" />
+                  <folding>
+                    <element signature="e#24#38#0" expanded="true" />
+                    <element signature="e#429#754#0" />
+                    <element signature="e#790#1629#0" />
+                    <element signature="e#1666#2508#0" />
+                    <element signature="e#2544#7226#0" />
+                    <element signature="e#7258#10179#0" />
+                    <element signature="e#8975#10179#0" />
+                    <element signature="e#10213#10608#0" />
+                    <element signature="e#10640#11582#0" />
+                    <element signature="e#11621#13911#0" />
+                    <element signature="e#13950#16582#0" />
+                    <element signature="e#16620#22431#0" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/api/search4api.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-286">
+                  <caret line="248" column="16" lean-forward="true" selection-start-line="248" selection-start-column="16" selection-end-line="248" selection-end-column="16" />
+                  <folding>
+                    <element signature="e#24#39#0" expanded="true" />
+                    <element signature="e#410#824#0" />
+                    <element signature="e#869#3253#0" />
+                    <element signature="e#3303#5353#0" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/api/utils.py">
+              <provider selected="true" editor-type-id="text-editor" />
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/api/urls.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="380">
+                  <caret line="20" column="1" lean-forward="true" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
+                  <folding>
+                    <element signature="e#0#36#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/KMusic/settings.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="456">
+                  <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/api/search4api.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-229">
+                  <caret line="248" column="16" selection-start-line="248" selection-start-column="16" selection-end-line="248" selection-end-column="16" />
+                  <folding>
+                    <element signature="e#24#39#0" expanded="true" />
+                    <element signature="e#410#824#0" />
+                    <element signature="e#869#3253#0" />
+                    <element signature="e#3303#5353#0" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -120,7 +154,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="120" />
     <option name="y" value="30" />
     <option name="width" value="1612" />
@@ -219,19 +253,19 @@
       <workItem from="1566261398571" duration="8822000" />
       <workItem from="1566459465175" duration="5374000" />
       <workItem from="1566521517262" duration="654000" />
-      <workItem from="1566790870362" duration="4779000" />
+      <workItem from="1566790870362" duration="8097000" />
+      <workItem from="1566961869012" duration="2999000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="103093000" />
+    <option name="totallyTimeSpent" value="109410000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48970747" weight="0.15938166" />
-      <window_info id="Structure" order="1" sideWeight="0.51029253" side_tool="true" weight="0.15938166" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48657188" visible="true" weight="0.13326226" />
+      <window_info id="Structure" order="1" sideWeight="0.5134281" side_tool="true" visible="true" weight="0.13326226" />
       <window_info id="Favorites" order="2" sideWeight="0.50541514" side_tool="true" weight="0.15191898" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -243,8 +277,8 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5021322" side_tool="true" weight="0.2708559" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" sideWeight="0.4978678" visible="true" weight="0.3954496" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5026652" side_tool="true" visible="true" weight="0.31419286" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" sideWeight="0.49733475" visible="true" weight="0.31419286" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -267,13 +301,6 @@
     <entry file="file://D:/ProgramData/Anaconda3/Lib/concurrent/futures/__init__.py" />
     <entry file="file://D:/ProgramData/Anaconda3/Lib/concurrent/futures/thread.py" />
     <entry file="file://D:/ProgramData/Anaconda3/Lib/site-packages/aiohttp/client.py" />
-    <entry file="file://$PROJECT_DIR$/KMusic/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/api/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -290,16 +317,10 @@
     <entry file="file://$PROJECT_DIR$/api/utils.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/api/search4api.py">
+    <entry file="file://$PROJECT_DIR$/KMusic/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="452">
-          <caret line="253" column="47" lean-forward="true" selection-start-line="206" selection-start-column="8" selection-end-line="253" selection-end-column="47" />
-          <folding>
-            <element signature="e#24#39#0" expanded="true" />
-            <element signature="e#410#824#0" />
-            <element signature="e#869#3253#0" />
-            <element signature="e#3303#5353#0" />
-          </folding>
+        <state relative-caret-position="456">
+          <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
         </state>
       </provider>
     </entry>
@@ -313,10 +334,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/api/search4api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-286">
+          <caret line="248" column="16" lean-forward="true" selection-start-line="248" selection-start-column="16" selection-end-line="248" selection-end-column="16" />
+          <folding>
+            <element signature="e#24#39#0" expanded="true" />
+            <element signature="e#410#824#0" />
+            <element signature="e#869#3253#0" />
+            <element signature="e#3303#5353#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/api/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="109">
-          <caret line="688" column="46" selection-start-line="688" selection-start-column="46" selection-end-line="688" selection-end-column="46" />
+        <state relative-caret-position="4330">
+          <caret line="915" lean-forward="true" selection-start-line="915" selection-end-line="915" />
           <folding>
             <element signature="e#24#38#0" expanded="true" />
             <element signature="e#429#754#0" />
@@ -325,15 +359,11 @@
             <element signature="e#2544#7226#0" />
             <element signature="e#7258#10179#0" />
             <element signature="e#8975#10179#0" />
-            <element signature="e#10634#11576#0" />
-            <element signature="e#11615#13905#0" />
-            <element signature="e#13944#16576#0" />
-            <element signature="e#16614#22425#0" />
-            <element signature="e#22722#24853#0" />
-            <element signature="e#24920#27989#0" />
-            <element signature="e#27530#29812#0" />
-            <element signature="e#29531#31979#0" />
-            <element signature="e#31610#32012#0" />
+            <element signature="e#10213#10608#0" />
+            <element signature="e#10640#11582#0" />
+            <element signature="e#11621#13911#0" />
+            <element signature="e#13950#16582#0" />
+            <element signature="e#16620#22431#0" />
           </folding>
         </state>
       </provider>

@@ -351,7 +351,7 @@ class SearchView(APIView):
     """
     搜索 \n
     :param keyword: 搜索关键字 \n
-    :return: qq netease kuwo 三家详细搜索结果
+    :return: qq netease kuwo xiami 四家详细搜索结果
     """
     permission_classes = []
 
@@ -689,6 +689,12 @@ class PageFlip(APIView):
         kw = request.query_params.get('keyword')
         t_page = int(request.query_params.get('page'))
 
+        resd = {
+            'error': 0,
+            'msg': 'success',
+            'data': None
+        }
+
         if source == 'netease':
             url = 'https://music.163.com/weapi/cloudsearch/get/web'
 
@@ -739,6 +745,7 @@ class PageFlip(APIView):
                 songDic['album'] = song['al']['name']
                 songDic['album_pic'] = song['al']['picUrl']
                 result_dict['songs'].append(songDic)
+            resd['data'] = result_dict
 
         elif source == 'qq':
             url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
@@ -804,6 +811,7 @@ class PageFlip(APIView):
                     mid)
                 songDic['album'] = song['album']['name']
                 result_dict['songs'].append(songDic)
+            resd['data'] = result_dict
 
         elif source == 'kuwo':
             url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
@@ -853,6 +861,7 @@ class PageFlip(APIView):
                     pass
                 d['duration'] = song['songTimeMinutes']
                 result_dict['songs'].append(d)
+            resd['data'] = result_dict
 
         elif source == 'xiami':
             headers = {
@@ -903,13 +912,12 @@ class PageFlip(APIView):
                     r_dict['lyric'] = None
                 r_dict['needPayFlag'] = song['need_pay_flag']
                 result_dict['songs'].append(r_dict)
+            resd['data'] = result_dict
 
         else:
-            result_dict = {
-                "error": 1,
-                "msg": "参数有误",
-                "data": None
-            }
-        return Response(data=result_dict)
+            resd['error'] = 1
+            resd['msg'] = '参数有误'
+            resd['data'] = None
+        return Response(data=resd)
 
 

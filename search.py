@@ -33,32 +33,40 @@
 
 
 # # #######################################################  XIAMI  ###############################################################################
-# import requests, time
+import requests, time,json
 
-# kw = input('搜索:\n')
-# headers = {
-#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
-#     'referer': 'http://m.xiami.com/'
-# }
+kw = input('搜索:\n')
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+    'referer': 'http://m.xiami.com/',
+    'Host':'api.xiami.com'
+}
+search_url = 'http://api.xiami.com/web'
 
-# search_url = 'http://api.xiami.com/web'
-# session = requests.Session()
-# session.headers.update(headers)
+params = {
+    "key": kw,
+    "v": "2.0",
+    "app_key": "1",
+    "r": "search/songs",
+    "page": 1,
+    "limit": 50,
+}
 
+res = requests.get(search_url, params=params,headers=headers)
+print(res.text)
+
+# url = 'http://api.xiami.com/web'
 # params = {
-#     "key": kw,
 #     "v": "2.0",
 #     "app_key": "1",
-#     "r": "search/songs",
-#     "page": 1,
-#     "limit": 50,
+#     "r": "song/detail",
+#     "id": 1795547984,
 # }
-
-# res = session.get(search_url, params=params)
-# with open("xiamires.json","w") as f:
-#     f.write(res.text)
-
-
+# res = requests.get(url, params=params, headers=headers)
+# res.encoding = "utf-8"
+# res = json.loads(res.text)
+# url = res['data']['song'].get('listen_file','')
+# print(url)
 
 # ####################################  XIAMI  _s _q ###################################################
 # def getNeTime(ms):
@@ -68,35 +76,34 @@
 #     return '%02d:%02d' % (mi, se)
 
 
-import requests,json,hashlib
-s = requests.Session()
-s.headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
-    'referer': 'http://m.xiami.com/'
-}
+# import requests,json,hashlib
+# s = requests.Session()
+# s.headers = {
+#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+#     'referer': 'http://m.xiami.com/'
+# }
 
-def encrypted_params(keyword):
-    _q = dict(key=keyword, pagingVO=dict(page=1, pageSize=60))
-    _q = json.dumps(_q)
-    url = "https://www.xiami.com/search?key={}".format(keyword)
-    res = s.get(url)
-    print(res.cookies)
-    cookie = res.cookies.get("xm_sg_tk", "").split("_")[0]
-    origin_str = "%s_xmMain_/api/search/searchSongs_%s" % (cookie, _q)
-    _s = hashlib.md5(origin_str.encode()).hexdigest()
-    return dict(_q=_q, _s=_s)
+# def encrypted_params(keyword):
+#     _q = dict(key=keyword, pagingVO=dict(page=1, pageSize=60))
+#     _q = json.dumps(_q)
+#     url = "https://www.xiami.com/search?key={}".format(keyword)
+#     res = s.get(url)
+#     cookie = res.cookies.get("xm_sg_tk", "").split("_")[0]
+#     origin_str = "%s_xmMain_/api/search/searchSongs_%s" % (cookie, _q)
+#     _s = hashlib.md5(origin_str.encode()).hexdigest()
+#     return dict(_q=_q, _s=_s)
 
 
-def xiami_search(keyword):
-    params = encrypted_params(keyword=keyword)
-    res = s.get("https://www.xiami.com/api/search/searchSongs",params=params)
-    res.encoding = "utf-8"
-    res = json.loads(res.text)
-    return res
+# def xiami_search(keyword):
+#     params = encrypted_params(keyword=keyword)
+#     res = s.get("https://www.xiami.com/api/search/searchSongs",params=params)
+#     res.encoding = "utf-8"
+#     res = json.loads(res.text)
+#     return res
 
-kw = input('搜索关键词\n')
-r = xiami_search(kw)
-print(r)
+# kw = input('搜索关键词\n')
+# r = xiami_search(kw)
+# print(r)
 
 
 # r_d = {
