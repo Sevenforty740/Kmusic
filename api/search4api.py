@@ -174,16 +174,24 @@ class MusicSearcher():
 
         res = requests.get(url, headers=headers, params=params)
         search_res_dict = json.loads(res.text)
-        result_dict = {
-            "source": 'kuwo',
-            "paginate": {
-                "page": int(params['pn']),
-                "pagesize": int(params['rn']),
-                "pages": int(math.ceil(int(search_res_dict['data']['total']) / int(params['rn']))),
-                "count": int(search_res_dict['data']['total'])
-            },
-            "songs": []
-        }
+        try:
+            result_dict = {
+                "source": 'kuwo',
+                "paginate": {
+                    "page": int(params['pn']),
+                    "pagesize": int(params['rn']),
+                    "pages": int(math.ceil(int(search_res_dict['data']['total']) / int(params['rn']))),
+                    "count": int(search_res_dict['data']['total'])
+                },
+                "songs": []
+            }
+        except:
+            result_dict = {
+                "source": 'kuwo',
+                "songs":None
+            }
+            q.put_nowait(result_dict)
+            return
 
         for song in search_res_dict['data']['list']:
             d = {}
@@ -285,3 +293,4 @@ class MusicSearcher():
             }
         }
         return res
+

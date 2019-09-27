@@ -21,11 +21,11 @@
     <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/api/views.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="4330">
-                  <caret line="915" lean-forward="true" selection-start-line="915" selection-end-line="915" />
+                <state relative-caret-position="918">
+                  <caret line="536" column="30" selection-start-line="536" selection-start-column="23" selection-end-line="536" selection-end-column="30" />
                   <folding>
                     <element signature="e#24#38#0" expanded="true" />
                     <element signature="e#429#754#0" />
@@ -38,17 +38,16 @@
                     <element signature="e#10640#11582#0" />
                     <element signature="e#11621#13911#0" />
                     <element signature="e#13950#16582#0" />
-                    <element signature="e#16620#22431#0" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/api/search4api.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-286">
-                  <caret line="248" column="16" lean-forward="true" selection-start-line="248" selection-start-column="16" selection-end-line="248" selection-end-column="16" />
+                <state relative-caret-position="215">
+                  <caret line="193" column="18" selection-start-line="193" selection-start-column="18" selection-end-line="193" selection-end-column="18" />
                   <folding>
                     <element signature="e#24#39#0" expanded="true" />
                     <element signature="e#410#824#0" />
@@ -67,8 +66,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/api/urls.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="380">
-                  <caret line="20" column="1" lean-forward="true" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
+                <state relative-caret-position="306">
+                  <caret line="20" column="1" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
                   <folding>
                     <element signature="e#0#36#0" expanded="true" />
                   </folding>
@@ -79,8 +78,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/KMusic/settings.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="456">
-                  <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
+                <state>
+                  <caret column="3" lean-forward="true" selection-start-column="3" selection-end-column="3" />
                 </state>
               </provider>
             </entry>
@@ -88,12 +87,12 @@
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/api/search4api.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-229">
-                  <caret line="248" column="16" selection-start-line="248" selection-start-column="16" selection-end-line="248" selection-end-column="16" />
+                <state relative-caret-position="262">
+                  <caret line="272" column="18" selection-start-line="272" selection-start-column="18" selection-end-line="272" selection-end-column="18" />
                   <folding>
                     <element signature="e#24#39#0" expanded="true" />
                     <element signature="e#410#824#0" />
@@ -137,6 +136,7 @@
       <find>search</find>
       <find>target</find>
       <find>source</find>
+      <find>l</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -148,15 +148,14 @@
         <option value="$PROJECT_DIR$/main/apis/musicsearcher.py" />
         <option value="$PROJECT_DIR$/api/__init__.py" />
         <option value="$PROJECT_DIR$/KMusic/settings.py" />
-        <option value="$PROJECT_DIR$/api/search4api.py" />
         <option value="$PROJECT_DIR$/api/urls.py" />
         <option value="$PROJECT_DIR$/api/views.py" />
+        <option value="$PROJECT_DIR$/api/search4api.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="120" />
-    <option name="y" value="30" />
+    <option name="x" value="102" />
     <option name="width" value="1612" />
     <option name="height" value="1000" />
   </component>
@@ -190,7 +189,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -254,18 +253,25 @@
       <workItem from="1566459465175" duration="5374000" />
       <workItem from="1566521517262" duration="654000" />
       <workItem from="1566790870362" duration="8097000" />
-      <workItem from="1566961869012" duration="2999000" />
+      <workItem from="1566961869012" duration="6357000" />
+      <workItem from="1567557144343" duration="624000" />
+      <workItem from="1567585651944" duration="2062000" />
+      <workItem from="1568018804880" duration="1369000" />
+      <workItem from="1568076062496" duration="1053000" />
+      <workItem from="1568079100781" duration="620000" />
+      <workItem from="1569561849378" duration="334000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="109410000" />
+    <option name="totallyTimeSpent" value="118830000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48657188" visible="true" weight="0.13326226" />
-      <window_info id="Structure" order="1" sideWeight="0.5134281" side_tool="true" visible="true" weight="0.13326226" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.48410758" visible="true" weight="0.141258" />
+      <window_info id="Structure" order="1" sideWeight="0.51463413" side_tool="true" weight="0.13432837" />
       <window_info id="Favorites" order="2" sideWeight="0.50541514" side_tool="true" weight="0.15191898" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -277,8 +283,8 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5026652" side_tool="true" visible="true" weight="0.31419286" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" sideWeight="0.49733475" visible="true" weight="0.31419286" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5026652" side_tool="true" weight="0.31419286" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.49733475" visible="true" weight="0.108342364" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -314,43 +320,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/api/utils.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/KMusic/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/api/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="20" column="1" lean-forward="true" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
-          <folding>
-            <element signature="e#0#36#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/api/search4api.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-286">
-          <caret line="248" column="16" lean-forward="true" selection-start-line="248" selection-start-column="16" selection-end-line="248" selection-end-column="16" />
-          <folding>
-            <element signature="e#24#39#0" expanded="true" />
-            <element signature="e#410#824#0" />
-            <element signature="e#869#3253#0" />
-            <element signature="e#3303#5353#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/api/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4330">
-          <caret line="915" lean-forward="true" selection-start-line="915" selection-end-line="915" />
+        <state relative-caret-position="918">
+          <caret line="536" column="30" selection-start-line="536" selection-start-column="23" selection-end-line="536" selection-end-column="30" />
           <folding>
             <element signature="e#24#38#0" expanded="true" />
             <element signature="e#429#754#0" />
@@ -363,7 +336,39 @@
             <element signature="e#10640#11582#0" />
             <element signature="e#11621#13911#0" />
             <element signature="e#13950#16582#0" />
-            <element signature="e#16620#22431#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/api/utils.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/api/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="20" column="1" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
+          <folding>
+            <element signature="e#0#36#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/KMusic/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="3" lean-forward="true" selection-start-column="3" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/api/search4api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="215">
+          <caret line="193" column="18" selection-start-line="193" selection-start-column="18" selection-end-line="193" selection-end-column="18" />
+          <folding>
+            <element signature="e#24#39#0" expanded="true" />
+            <element signature="e#410#824#0" />
+            <element signature="e#869#3253#0" />
+            <element signature="e#3303#5353#0" />
           </folding>
         </state>
       </provider>
