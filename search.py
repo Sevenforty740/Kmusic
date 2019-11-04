@@ -33,27 +33,27 @@
 
 
 # # #######################################################  XIAMI  ###############################################################################
-import requests, time,json
+# import requests, time,json
 
-kw = input('搜索:\n')
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
-    'referer': 'http://m.xiami.com/',
-    'Host':'api.xiami.com'
-}
-search_url = 'http://api.xiami.com/web'
+# kw = input('搜索:\n')
+# headers = {
+#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+#     'referer': 'http://m.xiami.com/',
+#     'Host':'api.xiami.com'
+# }
+# search_url = 'http://api.xiami.com/web'
 
-params = {
-    "key": kw,
-    "v": "2.0",
-    "app_key": "1",
-    "r": "search/songs",
-    "page": 1,
-    "limit": 50,
-}
+# params = {
+#     "key": kw,
+#     "v": "2.0",
+#     "app_key": "1",
+#     "r": "search/songs",
+#     "page": 1,
+#     "limit": 50,
+# }
 
-res = requests.get(search_url, params=params,headers=headers)
-print(res.text)
+# res = requests.get(search_url, params=params,headers=headers)
+# print(res.text)
 
 # url = 'http://api.xiami.com/web'
 # params = {
@@ -164,3 +164,37 @@ print(res.text)
 
 # print(res.text)
 
+######################aiohttp #################################################################
+import asyncio,aiohttp,requests,hashlib,json
+from aiohttp import ClientSession
+s = requests.Session()
+s.headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+    'referer': 'http://m.xiami.com/'
+}
+
+def encrypted_params(keyword):
+    _q = dict(key=keyword, pagingVO=dict(page=1, pageSize=60))
+    _q = json.dumps(_q)
+    url = "https://www.xiami.com/search?key={}".format(keyword)
+    res = s.get(url)
+    cookie = res.cookies.get("xm_sg_tk", "").split("_")[0]
+    origin_str = "%s_xmMain_/api/search/searchSongs_%s" % (cookie, _q)
+    _s = hashlib.md5(origin_str.encode()).hexdigest()
+    cookies_d = s.cookies.get_dict()
+    return dict(_q=_q, _s=_s), cookies_d
+
+
+async def search(keyword):
+    params,cookies= encrypted_params(keyword=keyword)
+    async with ClientSession(headers=s.headers,cookies=cookies) as session:
+        async with session.get("https://www.xiami.com/api/search/searchSongs",params=params) as response:
+            res = await response.text()
+            print(res)
+
+
+tasks = []
+task = asyncio.ensure_future(search('radiohead'))
+tasks.append(task)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(asyncio.wait(tasks))

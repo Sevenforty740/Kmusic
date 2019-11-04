@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
-import requests
+from concurrent.futures import ThreadPoolExecutor,ALL_COMPLETED,wait
+from .netEaseEncode import encrypted_request 
+import requests,json,hashlib
 from threading import Thread
-from .netEaseEncode import *
 import time
 import math
 import queue
@@ -19,18 +20,27 @@ def getNeTime(ms):
     se = s % 60
     return '%02d:%02d' % (mi, se)
 
+def timetest(search):
+    def func(*args):
+        t1 = time.time()
+        search(*args)
+        t2 = time.time()
+        print(search.__name__,t2 - t1)
+    return func
+
+
 class MusicSearcher():
     def encrypted_params(self, keyword):
         _q = dict(key=keyword, pagingVO=dict(page=1, pageSize=60))
         _q = json.dumps(_q)
         url = "https://www.xiami.com/search?key={}".format(keyword)
-        res = self.s.get(url)
+        res = requests.get(url)
         cookie = res.cookies.get("xm_sg_tk", "").split("_")[0]
         origin_str = "%s_xmMain_/api/search/searchSongs_%s" % (cookie, _q)
         _s = hashlib.md5(origin_str.encode()).hexdigest()
         return dict(_q=_q, _s=_s)
 
-    def searchQQ(self, target, q):
+    def searchQQ(self, target):
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
 
         headers = {
@@ -96,9 +106,9 @@ class MusicSearcher():
             songDic['album'] = song['album']['name']
             result_dict['songs'].append(songDic)
 
-        q.put_nowait(result_dict)
+        return result_dict
 
-    def searchNetease(self, target, q):
+    def searchNetease(self, target):
         url = 'https://music.163.com/weapi/cloudsearch/get/web'
 
         headers = {
@@ -151,29 +161,43 @@ class MusicSearcher():
             songDic['album_pic'] = song['al']['picUrl']
             result_dict['songs'].append(songDic)
 
-        q.put_nowait(result_dict)
+        return result_dict
 
-    def searchKuwo(self, target, q):
-        url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
-
+    def searchKuwo(self, target):
         headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Connection': 'Keep-Alive',
-            'Pragma': 'no-cache',
-            'Cache-Control': 'no-cache',
             'Accept-Encoding': 'gzip,deflate,sdch',
             'Accept-Language': 'zh-CN,zh;q=0.8',
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36',
+            'Referer':'http://www.kuwo.cn',
+            'Cookie':'Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1572236252,1572318582,1572508571,{}; Hm_lpvt_cdb524f42f0ce19b169a8071123a4797={}; kw_token=EYG0K0IBV4J'.format(int(time.time()),int(time.time())),
+            'csrf':'EYG0K0IBV4J'
         }
+        # index_url = 'http://www.kuwo.cn/'
+        # while True:
+        #     res = requests.get(index_url,headers=headers)
+        #     token = dict(res.cookies).get('kw_token')
+        #     if token:
+        #         # self.s.headers.update(self.headers)
+        #         headers['Cookie'] = 'kw_token={}'.format(token)
+        #         headers['csrf'] = token
+        #         break
 
         params = {
             'key': target,
             'pn': '1',
             'rn': '60',
+            'reqId': 'b6168da1-a385-11e9-b78e-a5d90de9d862'
         }
-
-        res = requests.get(url, headers=headers, params=params)
-        search_res_dict = json.loads(res.text)
+        search_url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
+        while True:
+            try:
+                res = requests.get(search_url, params=params,headers=headers)
+                search_res_dict = json.loads(res.text)
+                break
+            except json.decoder.JSONDecodeError:
+                pass
         try:
             result_dict = {
                 "source": 'kuwo',
@@ -188,10 +212,15 @@ class MusicSearcher():
         except:
             result_dict = {
                 "source": 'kuwo',
+                "paginate": {
+                    "page": int(params['pn']),
+                    "pagesize": int(params['rn']),
+                    "pages": 0,
+                    "count": 0
+                },
                 "songs":None
             }
-            q.put_nowait(result_dict)
-            return
+            return result_dict
 
         for song in search_res_dict['data']['list']:
             d = {}
@@ -209,9 +238,9 @@ class MusicSearcher():
                 pass
             d['duration'] = song['songTimeMinutes']
             result_dict['songs'].append(d)
-        q.put_nowait(result_dict)
+        return result_dict
 
-    def searchXiami(self, target, q):
+    def searchXiami(self, target):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
             'referer': 'http://m.xiami.com/'
@@ -261,36 +290,32 @@ class MusicSearcher():
             r_dict['needPayFlag'] = song['need_pay_flag']
             result_dict['songs'].append(r_dict)
 
-        q.put_nowait(result_dict)
+        return result_dict
 
     def search(self, target):
-        q = queue.Queue()
-        t1 = Thread(target=self.searchQQ,args=(target,q))
-        t2 = Thread(target=self.searchNetease,args=(target,q))
-        t3 = Thread(target=self.searchKuwo,args=(target,q))
-        t4 = Thread(target=self.searchXiami,args=(target,q))
-        t1.start()
-        t2.start()
-        t3.start()
-        t4.start()
-        t1.join()
-        t2.join()
-        t3.join()
-        t4.join()
-        first = q.get()
-        second = q.get()
-        third = q.get()
-        fourth = q.get()
+        executor = ThreadPoolExecutor(max_workers=4)
+        kuwo = executor.submit(self.searchKuwo,(target))
+        xiami = executor.submit(self.searchXiami,(target))
+        netease = executor.submit(self.searchNetease,(target))
+        qq = executor.submit(self.searchQQ,(target))
+        tasks = [kuwo,xiami,netease,qq]
+        wait(tasks,return_when=ALL_COMPLETED)
         res = {
             'error': 0,
             'msg': 'success',
             'data': {
                 'target': target,
-                first['source']: first,
-                second['source']: second,
-                third['source']: third,
-                fourth['source']: fourth
+                'xiami': xiami.result(),
+                'kuwo': kuwo.result(),
+                'netease': netease.result(),
+                'qq':qq.result()
             }
         }
         return res
 
+
+if __name__ == '__main__':
+    searcher = MusicSearcher()
+    res = searcher.search('radiohead')
+    print(res)
+    

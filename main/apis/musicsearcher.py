@@ -100,6 +100,16 @@ class MusicSearcher():
         self.q.put(resultList)
 
     def kuWoSearch(self):
+        index_url = 'http://www.kuwo.cn/'
+        while True:
+            self.s.get(index_url)
+            token = dict(self.s.cookies).get('kw_token')
+            if token:
+                # self.s.headers.update(self.headers)
+                self.s.headers.update({'Cookie' : 'kw_token={}'.format(token)})
+                self.s.headers.update({'csrf' : token})
+                self.s.headers.update({'Referer' : 'http://www.kuwo.cn'})
+                break
         search_params = {
             'key': self.target,
             'pn': '1',
@@ -127,7 +137,9 @@ class MusicSearcher():
                 pass
             d['duration'] = song['songTimeMinutes']
             resultList.append(d)
-
+        del self.s.headers['Referer']
+        del self.s.headers['Cookie']
+        del self.s.headers['csrf']
         self.q.put(resultList)
 
 
