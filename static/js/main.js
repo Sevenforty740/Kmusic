@@ -703,12 +703,11 @@ $(function(){
                   source: strs[1]
                 },
                 success:function (data) {
-                    thisbtn.prev().html(data);
+                    thisbtn.prev().text(data);
                 }
             });
         }
-
-        var src = thisbtn.prev().html();
+        var src = thisbtn.prev().text();
         var songname = thisbtn.parent().next().html();
         var singer = thisbtn.parent().next().next().next().children().html();
         var duration = thisbtn.parent().next().next().html();
@@ -723,6 +722,7 @@ $(function(){
         }
 
         $('#playing').attr({'src':src});
+        $('#playing')[0].load();
         $('#playing')[0].play();
         $('.songname').html(songname);
         $('.singer').html(singer);

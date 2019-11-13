@@ -145,29 +145,22 @@ def getSongUrl_views(request):
             url = "http://music.163.com/song/media/outer/url?id={}.mp3".format(songid)
 
         elif source == 'qq':
-            vkey_url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
             data = {
-                'g_tk': '195219765',
-                'jsonpCallback': 'MusicJsonCallback004680169373158849',
-                'loginUin': '125045209',
-                'hostUin': '0',
-                'format': 'json',
-                'inCharset': 'utf8',
-                'outCharset': 'utf-8',
-                'notice': '0',
-                'platform': 'yqq',
-                'needNewCode': '0',
-                'cid': '205361747',
-                'callback': 'MusicJsonCallback004680169373158849',
-                'uin': '125045209',
-                'songmid': songid,
-                'filename': 'C400{}.m4a'.format(songid),
-                'guid': 'B1E901DA7379A44022C5AF79FDD9CD96'
+                "req": {"module": "CDN.SrfCdnDispatchServer", "method": "GetCdnDispatch",
+                        "param": {"guid": "1848955700", "calltype": 0, "userip": ""}},
+                "req_0": {"module": "vkey.GetVkeyServer",
+                          "method": "CgiGetVkey",
+                          "param": {"guid": "1848955700", "songmid": [songid], "songtype": [0], "uin": "125045209",
+                                    "loginflag": 1, "platform": "20"}},
+                "comm": {"uin": 125045209, "format": "json", "ct": 24, "cv": 0}
             }
-            res = requests.get(vkey_url, params=data, verify=False)
-            res = json.loads(res.text[36:-1])
-            vkey = res['data']['items'][0]['vkey']
-            url = 'http://111.202.85.147/amobile.music.tc.qq.com/C400{}.m4a?guid=B1E901DA7379A44022C5AF79FDD9CD96&vkey={}&uin=2521&fromtag=77'.format(songid,vkey)
+            data = urllib.parse.quote(json.dumps(data))
+            vkey_url = 'https://u.y.qq.com/cgi-bin/musicu.fcg?-=getplaysongvkey14973006206196215&g_tk=5381&loginUin=125045209&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0&data={}'.format(
+                data)
+            res = requests.get(vkey_url)
+            res = json.loads(res.text)
+            url = r"{}{}".format(res['req_0']['data']['sip'][0],res['req_0']['data']['midurlinfo'][0]['purl'])
+            
 
         elif source == 'kuwo':
             url_params = {
