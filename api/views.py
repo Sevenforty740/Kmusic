@@ -805,26 +805,35 @@ class PageFlip(APIView):
             resd['data'] = result_dict
 
         elif source == 'kuwo':
-            url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
+            search_url = 'http://www.kuwo.cn/api/www/search/searchMusicBykeyWord'
 
             headers = {
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                 'Connection': 'Keep-Alive',
-                'Pragma': 'no-cache',
-                'Cache-Control': 'no-cache',
                 'Accept-Encoding': 'gzip,deflate,sdch',
                 'Accept-Language': 'zh-CN,zh;q=0.8',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36',
+                'Referer': 'http://www.kuwo.cn',
+                'Cookie': 'Hm_lvt_cdb524f42f0ce19b169a8071123a4797=1572236252,1572318582,1572508571,{}; Hm_lpvt_cdb524f42f0ce19b169a8071123a4797={}; kw_token=EYG0K0IBV4J'.format(
+                    int(time.time()), int(time.time())),
+                'csrf': 'EYG0K0IBV4J'
             }
 
             params = {
                 'key': kw,
                 'pn': str(t_page),
                 'rn': '60',
+                'reqId': 'b6168da1-a385-11e9-b78e-a5d90de9d862'
             }
 
-            res = requests.get(url, headers=headers, params=params)
-            search_res_dict = json.loads(res.text)
+            while True:
+                try:
+                    res = requests.get(search_url, params=params, headers=headers)
+                    search_res_dict = json.loads(res.text)
+                    break
+                except json.decoder.JSONDecodeError:
+                    pass
+
             result_dict = {
                 "source": 'kuwo',
                 "paginate": {
